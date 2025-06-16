@@ -1,55 +1,24 @@
-// Summarizes client history for quick understanding of past treatments and needs.
+// Summarizes client history for quick understanding of past treatments and needs. (MOCKED)
 
 'use server';
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+// Genkit and Zod are not used for this mocked version.
 
-const SummarizeClientHistoryInputSchema = z.object({
-  history: z
-    .string()
-    .describe(
-      'The complete historical records of a client, including past treatments, notes, and other relevant information.'
-    ),
-});
-
-export type SummarizeClientHistoryInput = z.infer<typeof SummarizeClientHistoryInputSchema>;
-
-const SummarizeClientHistoryOutputSchema = z.object({
-  summary: z
-    .string()
-    .describe(
-      'A concise summary of the client history, highlighting key treatments, issues, and needs.'
-    ),
-});
-
-export type SummarizeClientHistoryOutput = z.infer<typeof SummarizeClientHistoryOutputSchema>;
-
-export async function summarizeClientHistory(
-  input: SummarizeClientHistoryInput
-): Promise<SummarizeClientHistoryOutput> {
-  return summarizeClientHistoryFlow(input);
+export interface SummarizeClientHistoryInput {
+  history: string;
 }
 
-const summarizeClientHistoryPrompt = ai.definePrompt({
-  name: 'summarizeClientHistoryPrompt',
-  input: {schema: SummarizeClientHistoryInputSchema},
-  output: {schema: SummarizeClientHistoryOutputSchema},
-  prompt: `You are an expert medical professional.
+export interface SummarizeClientHistoryOutput {
+  summary: string;
+}
 
-  Please summarize the following client history, highlighting key treatments, issues, and needs:
-
-  Client History: {{{history}}}`,
-});
-
-const summarizeClientHistoryFlow = ai.defineFlow(
-  {
-    name: 'summarizeClientHistoryFlow',
-    inputSchema: SummarizeClientHistoryInputSchema,
-    outputSchema: SummarizeClientHistoryOutputSchema,
-  },
-  async input => {
-    const {output} = await summarizeClientHistoryPrompt(input);
-    return output!;
-  }
-);
+export async function summarizeClientHistory(
+  // input: SummarizeClientHistoryInput // Input is ignored for mock
+): Promise<SummarizeClientHistoryOutput> {
+  // Simulate a network delay
+  await new Promise(resolve => setTimeout(resolve, 500)); 
+  
+  return {
+    summary: "Este é um resumo mockado do histórico do cliente, gerado localmente para fins de demonstração. O paciente apresenta um bom quadro geral de saúde bucal, com visitas regulares para profilaxia. Últimos procedimentos incluem uma limpeza completa há 6 meses e uma pequena restauração no molar inferior direito há 2 anos. Nenhuma alergia reportada. Recomenda-se manter a rotina de check-ups semestrais.",
+  };
+}

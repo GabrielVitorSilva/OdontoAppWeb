@@ -12,6 +12,7 @@ export async function getClientHistorySummary(
       return { error: 'O histórico do cliente não pode estar vazio.' };
     }
 
+    // Call the (now mocked) summarizeClientHistory function
     const summaryOutput = await summarizeClientHistory(input);
     return summaryOutput;
   } catch (error) {

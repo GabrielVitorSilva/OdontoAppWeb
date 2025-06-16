@@ -1,6 +1,8 @@
+
 import type { Treatment, Appointment, Client, Professional, User } from '@/types';
 
 export const mockUsers: User[] = [
+  { id: 'user-root-admin', name: 'Gabriel Datas', email: 'gabrieldatas2004@gmail.com', role: 'admin' },
   { id: 'user-admin-01', name: 'Admin User', email: 'admin@odonto.app', role: 'admin' },
   { id: 'user-prof-01', name: 'Dr. Aline Silva', email: 'aline.silva@odonto.app', role: 'professional' },
   { id: 'user-client-01', name: 'Carlos Pereira', email: 'carlos.pereira@email.com', role: 'client' },

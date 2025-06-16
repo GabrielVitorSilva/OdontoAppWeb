@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -8,14 +9,13 @@ import { useAuth } from '@/contexts/auth-context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form'; // Added Controller here
-import { z } from 'zod';
+import { useForm, Controller } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from "@/types";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um email válido." }),
-  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
+  password: z.string().min(1, { message: "A senha é obrigatória." }), // Can be min 1 if auth logic doesn't strictly enforce length for existing users
   role: z.enum(['admin', 'professional', 'client'], { message: "Por favor, selecione um tipo de usuário."}),
 });
 
@@ -24,14 +24,15 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
-  const { register, handleSubmit, formState: { errors }, control, setValue } = useForm<LoginFormValues>({
+  const { register, handleSubmit, formState: { errors }, control } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = (data: LoginFormValues) => {
-    // In a real app, you'd call an API. Here, we use the mock login.
-    login(data.email, data.role as User['role']);
-    router.push('/dashboard'); 
+    login(data.email, data.role as User['role'], data.password);
+    // Router push should ideally happen based on successful login state change in AuthContext
+    // For now, it optimistically pushes. This might be handled by useEffect in DashboardLayout.
+    // router.push('/dashboard'); 
   };
 
   return (
@@ -77,7 +78,7 @@ export function LoginForm() {
       </CardContent>
       <CardFooter className="flex flex-col items-center gap-2">
         <p className="text-sm text-muted-foreground">
-          Não tem uma conta?{' '}
+          Não tem uma conta de cliente?{' '}
           <Button variant="link" asChild className="p-0">
             <Link href="/auth/signup">Cadastre-se</Link>
           </Button>

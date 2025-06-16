@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, Controller } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { User } from "@/types";
+import { z } from 'zod'; // Added import
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um email válido." }),

@@ -2,13 +2,13 @@
 "use client";
 
 import type { User } from '@/types';
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { mockUsers } from '@/lib/mock-data'; // For demo purposes
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, role: User['role'], password?: string) => void; // Added password (optional for now)
+  login: (email: string, role: User['role'], password?: string) => void;
   logout: () => void;
   loading: boolean;
 }
@@ -41,30 +41,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Root admin login
       const rootAdmin = mockUsers.find(u => u.email === 'gabrieldatas2004@gmail.com' && u.role === 'admin');
       if (rootAdmin) {
-        // In a real app, you would validate the password here
-        // For this mock, if email matches, we assume login is successful for root admin
+        // In a real app, you would validate the password here (e.g. check if password === '123456')
         userToLogin = rootAdmin;
       } else {
+        // This case should ideally not happen if mock-data.ts is correct
         console.error("Root admin user (gabrieldatas2004@gmail.com) not found in mock-data.ts. Please ensure it's defined.");
-        // Fallback for safety, though ideally mock-data should be correct
-        userToLogin = { id: 'user-root-admin-fallback', name: 'Gabriel Datas (Fallback)', email: 'gabrieldatas2004@gmail.com', role: 'admin' };
+        // Fallback for safety, creates a temporary root admin object if not found in mocks
+        userToLogin = { id: 'user-root-admin-fallback', name: 'Gabriel Datas (Fallback)', email: 'gabrieldatas2004@gmail.com', role: 'admin', password: password };
       }
     } else {
       // Standard user login or new client registration (from signup form)
       userToLogin = mockUsers.find(u => u.email === email && u.role === role) || null;
 
+      // Signup form only creates 'client' role users
       if (!userToLogin && role === 'client') {
-        // This path is taken by the signup form, which now only registers clients
-        // Create a new client user
         const newClient: User = { 
           id: `user-${Date.now()}`, 
           name: email.split('@')[0], // Simple name generation
           email, 
-          role: 'client' 
+          role: 'client',
+          password: password // Store password from signup for the new mock user
         };
         mockUsers.push(newClient); // Add to mockUsers array for demo persistence
         userToLogin = newClient;
-        console.log("New client registered and added to mockUsers:", newClient);
       }
     }
     
@@ -76,11 +75,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
          console.error("Failed to save user to localStorage", error);
       }
     } else {
-      // Handle login failure for non-root, non-new-client cases
-      // (e.g., trying to log in as a professional/admin that doesn't exist)
-      console.warn(`Login attempt failed for ${email} with role ${role}. User not found or incorrect credentials/role.`);
-      // Optionally, show a toast or set an error state here
-      // For now, user remains null, and isAuthenticated will be false
+      // Login failed for existing user attempt (not a new client signup)
+      setUser(null); // Explicitly set user to null
+      try {
+        localStorage.removeItem('odontoUser'); // Clear any erroneous stored user
+      } catch (error) {
+        console.error("Failed to remove user from localStorage", error);
+      }
+      console.warn(`Login attempt failed for ${email} with role ${role}. User not found or credentials/role mismatch.`);
+      // Optionally, you could use a toast notification here to inform the user of login failure
     }
     setLoading(false);
   };
@@ -91,7 +94,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       localStorage.removeItem('odontoUser');
     } catch (error) {
-      console.error("Failed to remove user from localStorage", error);
+      console.error("Failed to remove user from localStorage during logout", error);
     }
     setLoading(false);
   };
@@ -104,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export const useAuth = () => {
-  const context = React.useContext(AuthContext);
+  const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }

@@ -4,6 +4,7 @@ export interface User {
   name: string;
   email: string;
   role: 'admin' | 'professional' | 'client';
+  password?: string; // Added for user creation
 }
 
 export interface Treatment {

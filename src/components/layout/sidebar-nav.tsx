@@ -11,22 +11,36 @@ import {
   ClipboardList,
   CalendarDays,
   Users,
-  Settings,
+  Settings, // Kept for future example, can be removed if not needed
+  UsersCog, // Icon for user management
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/contexts/auth-context';
 
-const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/dashboard/treatments', label: 'Tratamentos', icon: ClipboardList },
-  { href: '/dashboard/appointments', label: 'Consultas', icon: CalendarDays },
-  { href: '/dashboard/clients', label: 'Clientes', icon: Users },
-  // { href: '/dashboard/professionals', label: 'Profissionais', icon: Stethoscope }, // Example for future
-  // { href: '/dashboard/settings', label: 'Configurações', icon: Settings }, // Example for future
+const baseNavItems = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
+  { href: '/dashboard/treatments', label: 'Tratamentos', icon: ClipboardList, adminOnly: false },
+  { href: '/dashboard/appointments', label: 'Consultas', icon: CalendarDays, adminOnly: false },
+  { href: '/dashboard/clients', label: 'Clientes', icon: Users, adminOnly: false },
 ];
+
+const adminNavItems = [
+    { href: '/dashboard/users', label: 'Usuários', icon: UsersCog, adminOnly: true },
+];
+
+// Example for future:
+// { href: '/dashboard/settings', label: 'Configurações', icon: Settings, adminOnly: true },
+
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const navItems = [
+    ...baseNavItems,
+    ...(user?.role === 'admin' ? adminNavItems : [])
+  ];
 
   return (
     <SidebarMenu>

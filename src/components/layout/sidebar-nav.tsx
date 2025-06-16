@@ -12,7 +12,7 @@ import {
   CalendarDays,
   Users,
   Settings, // Kept for future example, can be removed if not needed
-  UsersCog, // Icon for user management
+  UserCog, // Corrected: Icon for user management
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -26,7 +26,7 @@ const baseNavItems = [
 ];
 
 const adminNavItems = [
-    { href: '/dashboard/users', label: 'Usuários', icon: UsersCog, adminOnly: true },
+    { href: '/dashboard/users', label: 'Usuários', icon: UserCog, adminOnly: true }, // Corrected: UserCog
 ];
 
 // Example for future:

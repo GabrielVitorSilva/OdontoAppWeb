@@ -1,3 +1,4 @@
+
 'use client';
 
 import { PageHeader } from "@/components/page-header";
@@ -11,8 +12,10 @@ import { TreatmentDialog } from "@/components/treatments/treatment-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useAuth } from "@/contexts/auth-context"; // Import useAuth
 
 export default function TreatmentsPage() {
+  const { user } = useAuth(); // Get current user
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTreatment, setSelectedTreatment] = useState<Treatment | null>(null);
@@ -24,17 +27,22 @@ export default function TreatmentsPage() {
     setTreatments(mockTreatments);
   }, []);
 
+  const isAdmin = user?.role === 'admin';
+
   const handleAddNew = () => {
+    if (!isAdmin) return; // Prevent action if not admin
     setSelectedTreatment(null);
     setIsDialogOpen(true);
   };
 
   const handleEdit = (treatment: Treatment) => {
+    if (!isAdmin) return; // Prevent action if not admin
     setSelectedTreatment(treatment);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (treatmentId: string) => {
+    if (!isAdmin) return; // Prevent action if not admin
     // Confirm deletion
     if (window.confirm("Tem certeza que deseja excluir este tratamento?")) {
       setTreatments(prev => prev.filter(t => t.id !== treatmentId));
@@ -47,6 +55,7 @@ export default function TreatmentsPage() {
   };
 
   const handleSave = (data: Treatment) => {
+    if (!isAdmin) return; // Prevent action if not admin
     if (selectedTreatment) {
       // Update existing treatment
       setTreatments(prev => prev.map(t => t.id === data.id ? data : t));
@@ -64,11 +73,13 @@ export default function TreatmentsPage() {
 
   return (
     <>
-      <PageHeader title="Gerenciamento de Tratamentos" description="Crie, edite e visualize os tratamentos oferecidos.">
-        <Button onClick={handleAddNew}>
-          <PlusCircle className="w-4 h-4 mr-2" />
-          Novo Tratamento
-        </Button>
+      <PageHeader title="Gerenciamento de Tratamentos" description="Visualize os tratamentos oferecidos. Administradores podem criar e editar.">
+        {isAdmin && ( // Only show button if user is admin
+          <Button onClick={handleAddNew}>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Novo Tratamento
+          </Button>
+        )}
       </PageHeader>
 
       <div className="mb-6">
@@ -87,8 +98,8 @@ export default function TreatmentsPage() {
               <TreatmentCard 
                 key={treatment.id} 
                 treatment={treatment} 
-                onEdit={handleEdit}
-                onDelete={handleDelete}
+                onEdit={isAdmin ? handleEdit : undefined} // Pass functions only if admin
+                onDelete={isAdmin ? handleDelete : undefined} // Pass functions only if admin
               />
             ))}
           </div>
@@ -100,12 +111,14 @@ export default function TreatmentsPage() {
         </div>
       )}
 
-      <TreatmentDialog
-        treatment={selectedTreatment}
-        open={isDialogOpen}
-        onOpenChange={setIsDialogOpen}
-        onSave={handleSave}
-      />
+      {isAdmin && ( // Only render dialog if admin, to prevent non-admins from opening it through other means
+        <TreatmentDialog
+          treatment={selectedTreatment}
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          onSave={handleSave}
+        />
+      )}
     </>
   );
 }

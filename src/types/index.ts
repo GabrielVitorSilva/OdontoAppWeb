@@ -1,10 +1,24 @@
-
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'professional' | 'client';
-  password?: string; // Added for user creation
+  user: {
+   User: {
+    id: string;
+    name: string;
+    email: string;
+    role: Profile;
+   } 
+   profileData: {
+    id: string,
+    userId: string,
+    createdAt: string,
+    updatedAt: string
+   }
+  };
+}
+
+export enum Profile {
+  CLIENT = 'CLIENT',
+  ADMIN = 'ADMIN',
+  PROFESSIONAL = 'PROFESSIONAL',
 }
 
 export interface Treatment {

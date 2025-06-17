@@ -41,7 +41,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       password
     })
     localStorage.setItem('odontoAccessToken', response.data.token);
-    console.log(response.data);
+    const profile = await api.post('/me');
+    console.log(profile.data);
     return
     let userToLogin: User | null = null;
 

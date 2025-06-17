@@ -28,8 +28,6 @@ export default function SignupPage() {
     );
   }
 
-  // If authenticated and not loading, the useEffect above will handle the redirect.
-  // We render the form if not authenticated.
   if (isAuthenticated) return null;
 
   return (

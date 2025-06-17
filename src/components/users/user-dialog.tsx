@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { User } from "@/types";
+import { fetchAllUsersByIdResponse, Profile, User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
@@ -23,7 +22,9 @@ import { useToast } from "@/hooks/use-toast";
 const userSchemaBase = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
   email: z.string().email("Formato de email inválido."),
-  role: z.enum(['admin', 'professional'], "Selecione um tipo de usuário válido (Admin ou Profissional)."),
+  role: z.enum([Profile.ADMIN, Profile.PROFESSIONAL, Profile.CLIENT], {
+    errorMap: () => ({ message: "Selecione um tipo de usuário válido (Admin ou Profissional)." })
+  }),
 });
 
 const newUserSchema = userSchemaBase.extend({
@@ -34,15 +35,18 @@ const newUserSchema = userSchemaBase.extend({
   path: ["confirmPassword"],
 });
 
-const editUserSchema = userSchemaBase; // Password not directly editable here
+const editUserSchema = userSchemaBase;
 
-type NewUserFormValues = z.infer<typeof newUserSchema>;
-type EditUserFormValues = z.infer<typeof editUserSchema>;
-type UserFormValues = NewUserFormValues | EditUserFormValues;
-
+type FormValues = {
+  name: string;
+  email: string;
+  role: Profile;
+  password?: string;
+  confirmPassword?: string;
+};
 
 interface UserDialogProps {
-  user?: User | null;
+  user?: fetchAllUsersByIdResponse | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: User) => void;
@@ -52,31 +56,34 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
   const { toast } = useToast();
   const isEditing = !!user;
 
-  const { control, register, handleSubmit, reset, watch, formState: { errors } } = useForm<UserFormValues>({
+  const { control, register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(isEditing ? editUserSchema : newUserSchema),
-    defaultValues: {
-        name: "",
-        email: "",
-        role: "professional",
-        password: "",
-        confirmPassword: "",
+    defaultValues: isEditing ? {
+      name: user.User.name,
+      email: user.User.email,
+      role: user.User.role,
+    } : {
+      name: "",
+      email: "",
+      role: Profile.PROFESSIONAL,
+      password: "",
+      confirmPassword: "",
     }
   });
 
   useEffect(() => {
-    if (open) { // Reset form only when dialog opens or user prop changes
+    if (open) {
       if (user) {
         reset({
-          name: user.name,
-          email: user.email,
-          role: user.role as 'admin' | 'professional', // Ensure role is one of the allowed types
-          // Password fields are not pre-filled for editing
+          name: user.User.name,
+          email: user.User.email,
+          role: user.User.role,
         });
       } else {
         reset({
           name: "",
           email: "",
-          role: "professional",
+          role: Profile.PROFESSIONAL,
           password: "",
           confirmPassword: "",
         });
@@ -84,47 +91,33 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
     }
   }, [user, open, reset]);
 
-  const onSubmit = (data: UserFormValues) => {
-    let userDataToSave: User;
-
-    if (isEditing && user) {
-        // For editing, we don't include password fields from the form
-        const editData = data as EditUserFormValues;
-        userDataToSave = {
-            ...user, // existing user data including id and original password
-            name: editData.name,
-            email: editData.email,
-            role: editData.role,
-        };
-    } else {
-        // For new user, include password
-        const newData = data as NewUserFormValues;
-        userDataToSave = {
-            id: `user-${Date.now()}`, // Temporary ID, real app would get from backend
-            name: newData.name,
-            email: newData.email,
-            role: newData.role,
-            password: newData.password, // Store password for new user (in mock data)
-        };
-    }
-    
-    // Prevent changing role of root admin
-    if (isEditing && user?.email === 'gabrieldatas2004@gmail.com' && user.role === 'admin' && userDataToSave.role !== 'admin') {
+  const onSubmit = (data: FormValues) => {
+    try {
+      const userData: User = {
+        user: {
+          User: {
+            id: user?.User.id || "",
+            name: data.name,
+            email: data.email,
+            role: data.role,
+          },
+          profileData: user?.profileData || {
+            id: "",
+            userId: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          }
+        }
+      };
+      onSave(userData);
+      onOpenChange(false);
+    } catch (error) {
       toast({
-        title: "Ação Inválida",
-        description: "Não é possível alterar o tipo de usuário da conta root.",
+        title: "Erro ao salvar usuário",
+        description: "Ocorreu um erro ao tentar salvar o usuário.",
         variant: "destructive",
       });
-      return;
     }
-
-
-    onSave(userDataToSave);
-    toast({
-        title: isEditing ? "Usuário Atualizado!" : "Usuário Criado!",
-        description: `O usuário "${data.name}" foi salvo com sucesso.`,
-    });
-    onOpenChange(false);
   };
 
   return (
@@ -144,7 +137,7 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register("email")} disabled={isEditing && user?.email === 'gabrieldatas2004@gmail.com'}/>
+            <Input id="email" type="email" {...register("email")} disabled={isEditing && user?.User.email === 'gabrieldatas2004@gmail.com'}/>
              {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
           </div>
           
@@ -153,12 +146,12 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
               <div>
                 <Label htmlFor="password">Senha</Label>
                 <Input id="password" type="password" {...register("password")} />
-                {errors.password && <p className="text-sm text-destructive mt-1">{(errors.password as any).message}</p>}
+                {!isEditing && errors.password && <p className="text-sm text-destructive mt-1">{(errors as any).password?.message}</p>}
               </div>
               <div>
                 <Label htmlFor="confirmPassword">Confirmar Senha</Label>
                 <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
-                {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{(errors.confirmPassword as any).message}</p>}
+                {!isEditing && errors.confirmPassword && <p className="text-sm text-destructive mt-1">{(errors as any).confirmPassword?.message}</p>}
               </div>
             </>
           )}
@@ -172,7 +165,7 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
                 <Select 
                     onValueChange={field.onChange} 
                     value={field.value}
-                    disabled={isEditing && user?.email === 'gabrieldatas2004@gmail.com' && user.role === 'admin'}
+                    disabled={isEditing && user.User.role === Profile.ADMIN} 
                 >
                   <SelectTrigger id="role">
                     <SelectValue placeholder="Selecione o tipo" />

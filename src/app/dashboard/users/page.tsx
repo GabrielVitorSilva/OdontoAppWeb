@@ -92,7 +92,6 @@ export default function UsersPage() {
   };
 
   const handleEdit = (userToEdit: fetchAllUsersByIdResponse) => {
-    console.log("Editing user:", userToEdit);
     setSelectedUser(userToEdit);
     setIsDialogOpen(true);
   };
@@ -133,7 +132,6 @@ export default function UsersPage() {
       user.User.email.toLowerCase().includes(searchTerm.toLowerCase()))
     )
   );
-  console.log("Filtered Users:", filteredUsers);
   if (authLoading) {
     return <div className="flex justify-center items-center h-full"><p>Carregando...</p></div>;
   }

@@ -23,7 +23,7 @@ const baseNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
   { href: '/dashboard/treatments', label: 'Tratamentos', icon: ClipboardList, adminOnly: false },
   { href: '/dashboard/appointments', label: 'Consultas', icon: CalendarDays, adminOnly: false },
-  { href: '/dashboard/clients', label: 'Clientes', icon: Users, adminOnly: false },
+  // { href: '/dashboard/clients', label: 'Clientes', icon: Users, adminOnly: false },
 ];
 
 const adminNavItems = [

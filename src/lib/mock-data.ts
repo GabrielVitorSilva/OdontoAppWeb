@@ -1,12 +1,13 @@
 
 import type { Treatment, Appointment, Client, Professional, User } from '@/types';
+import { Profile } from '@/types'; // Import the Profile enum
 
 export const mockUsers: User[] = [
-  { id: 'user-root-admin', name: 'Gabriel Datas', email: 'gabrieldatas2004@gmail.com', role: 'admin' },
-  { id: 'user-admin-01', name: 'Admin User', email: 'admin@odonto.app', role: 'admin' },
-  { id: 'user-prof-01', name: 'Dr. Aline Silva', email: 'aline.silva@odonto.app', role: 'professional' },
-  { id: 'user-client-01', name: 'Carlos Pereira', email: 'carlos.pereira@email.com', role: 'client' },
-  { id: 'user-client-02', name: 'Beatriz Costa', email: 'beatriz.costa@email.com', role: 'client' },
+  { id: 'user-root-admin', name: 'Gabriel Datas', email: 'gabrieldatas2004@gmail.com', role: Profile.ADMIN, password: '123456' },
+  { id: 'user-admin-01', name: 'Admin User', email: 'admin@odonto.app', role: Profile.ADMIN, password: 'adminpassword' },
+  { id: 'user-prof-01', name: 'Dr. Aline Silva', email: 'aline.silva@odonto.app', role: Profile.PROFESSIONAL, password: 'doctorpassword' },
+  { id: 'user-client-01', name: 'Carlos Pereira', email: 'carlos.pereira@email.com', role: Profile.CLIENT, password: 'clientpassword1' },
+  { id: 'user-client-02', name: 'Beatriz Costa', email: 'beatriz.costa@email.com', role: Profile.CLIENT, password: 'clientpassword2' },
 ];
 
 export const mockTreatments: Treatment[] = [

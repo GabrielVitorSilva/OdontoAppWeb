@@ -1,18 +1,10 @@
+
 export interface User {
-  user: {
-   User: {
-    id: string;
-    name: string;
-    email: string;
-    role: Profile;
-   } 
-   profileData: {
-    id: string,
-    userId: string,
-    createdAt: string,
-    updatedAt: string
-   }
-  };
+  id: string;
+  name: string;
+  email: string;
+  role: Profile; // Using the Profile enum
+  // Add any other top-level properties your API returns for a user
 }
 
 export enum Profile {

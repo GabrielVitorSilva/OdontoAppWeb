@@ -97,8 +97,26 @@ export default function UsersPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (userId: string) => {
-    
+  const handleDelete = async (userId: string) => {
+    try {
+      const response = await api.delete(`/users/${userId}`);
+      if (response.status === 200) {
+        setUsers(users.filter(user => user.profileData.id !== userId));
+        toast({
+          title: "Usuário excluído com sucesso",
+          description: "O usuário foi removido da lista.",
+          variant: "default",
+        });
+      }
+    } catch (error:any) {
+      console.error("Erro ao excluir usuário:", error.response?.data);
+      toast({
+        title: "Erro ao excluir usuário",
+        description: error.response?.data?.message || "Não foi possível excluir o usuário.",
+        variant: "destructive",
+      });
+      
+    }
   };
 
   const handleSave = (data: User) => {
@@ -168,7 +186,7 @@ export default function UsersPage() {
                 key={data.User.role} 
                 user={data} 
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                onDelete={() => {handleDelete(data.User.id)}}
                 currentUserId={user.user.User.id}
               />
             ))}

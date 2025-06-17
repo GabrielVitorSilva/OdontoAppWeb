@@ -1,17 +1,17 @@
 export interface User {
   user: {
-   User: {
-    id: string;
-    name: string;
-    email: string;
-    role: Profile;
-   } 
-   profileData: {
-    id: string,
-    userId: string,
-    createdAt: string,
-    updatedAt: string
-   }
+    User: {
+      id: string;
+      name: string;
+      email: string;
+      role: Profile;
+    }
+    profileData: {
+      id: string,
+      userId: string,
+      createdAt: string,
+      updatedAt: string
+    }
   };
 }
 
@@ -20,6 +20,31 @@ export enum Profile {
   CLIENT = 'CLIENT',
   ADMIN = 'ADMIN',
   PROFESSIONAL = 'PROFESSIONAL',
+}
+
+export interface fetchAllUsersResponse {
+  id: string,
+  name: string,
+  email: string,
+  cpf: string,
+  role: Profile,
+  createdAt: string,
+  updatedAt: string
+}
+
+export interface fetchAllUsersByIdResponse {
+  User: {
+    id: string;
+    name: string;
+    email: string;
+    role: Profile;
+  }
+  profileData: {
+    id: string,
+    userId: string,
+    createdAt: string,
+    updatedAt: string
+  }
 }
 
 export interface Treatment {
@@ -33,9 +58,9 @@ export interface Treatment {
 export interface Appointment {
   id: string;
   clientId: string;
-  clientName?: string; 
+  clientName?: string;
   professionalId: string;
-  professionalName?: string; 
+  professionalName?: string;
   treatmentId: string;
   treatmentName?: string;
   date: string; // ISO string for date part
@@ -51,7 +76,7 @@ export interface Client {
   phone: string;
   dateOfBirth?: string; // ISO string
   address?: string;
-  medicalHistory?: string; 
+  medicalHistory?: string;
   treatmentHistory?: Array<{
     treatmentId: string;
     treatmentName: string;

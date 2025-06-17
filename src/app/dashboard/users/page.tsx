@@ -3,8 +3,7 @@
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { mockUsers } from "@/lib/mock-data";
-import type { User } from "@/types";
-import { Profile } from "@/types";
+import { Profile, type fetchAllUsersByIdResponse, type fetchAllUsersResponse, type User } from "@/types";
 import { PlusCircle, ShieldAlert } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { UserCard } from "@/components/users/user-card";
@@ -15,95 +14,106 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import api from "@/services/api";
 
 export default function UsersPage() {
-  const { user: currentUser, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<fetchAllUsersByIdResponse[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<fetchAllUsersByIdResponse | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect(() => {
-    if (!authLoading && currentUser?.user.User.role !== Profile.ADMIN) {
+  async function fetchUserById(userId: string) {
+    try {
+      const response = await api.get(`/users/${userId}`);
+      const userData = response.data.user as fetchAllUsersByIdResponse;
+      return userData;
+    } catch (error) {
+      console.error("Erro ao buscar usuário:", error);
       toast({
-        title: "Acesso Negado",
-        description: "Você não tem permissão para acessar esta página.",
+        title: "Erro ao buscar usuário",
+        description: "Não foi possível carregar os dados do usuário.",
         variant: "destructive",
       });
-      router.push("/dashboard");
-    } else if (!authLoading && currentUser?.user.User.role === Profile.ADMIN) {
-      setUsers(mockUsers.filter(u => u.user.User.role === Profile.ADMIN || u.user.User.role === Profile.PROFESSIONAL));
+      return null;
     }
-  }, [currentUser, authLoading, router, toast]);
+  }
+
+  async function fetchUsers() {
+    try {
+      const response = await api.get("/users");
+      const data = response.data.users as fetchAllUsersResponse[];
+      let AllUsers: fetchAllUsersByIdResponse[] = [];
+      for (const user of data) {
+        const userData = await fetchUserById(user.id);
+        if (userData) {
+          AllUsers.push(userData);
+        }
+      }
+      setUsers(AllUsers);
+    } catch (error) {
+      console.error("Erro ao buscar usuários:", error);
+      toast({
+        title: "Erro ao buscar usuários",
+        description: "Não foi possível carregar os usuários no momento.",
+        variant: "destructive",
+      });
+      setUsers([]);
+    }
+  }
+
+  useEffect(() => {
+    fetchUsers();
+
+    if (!authLoading) {
+      if (!user || !user.user) {
+        toast({
+          title: "Acesso Negado",
+          description: "Você não tem permissão para acessar esta página.",
+          variant: "destructive",
+        });
+        router.push("/dashboard");
+      } else if (user.user.User.role  === Profile.ADMIN) {
+        fetchUsers();
+      }
+    }
+  }, [authLoading, user, router, toast]);
 
   const handleAddNew = () => {
     setSelectedUser(null);
     setIsDialogOpen(true);
   };
 
-  const handleEdit = (userToEdit: User) => {
+  const handleEdit = (userToEdit: fetchAllUsersByIdResponse) => {
+    console.log("Editing user:", userToEdit);
     setSelectedUser(userToEdit);
     setIsDialogOpen(true);
   };
 
   const handleDelete = (userId: string) => {
-    if (currentUser?.user.User.id === userId) {
-      toast({
-        title: "Ação Inválida",
-        description: "Você não pode excluir sua própria conta.",
-        variant: "destructive",
-      });
-      return;
-    }
-    if (window.confirm("Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.")) {
-      const userToDelete = mockUsers.find(u => u.user.User.id === userId);
-      if (currentUser?.user.User.email === 'gabrieldatas2004@gmail.com') {
-          toast({
-            title: "Ação Inválida",
-            description: "A conta root do administrador não pode ser excluída.",
-            variant: "destructive",
-          });
-          return;
-      }
-      
-      const userIndex = mockUsers.findIndex(u => u.user.User.id === userId);
-      if (userIndex > -1) {
-        mockUsers.splice(userIndex, 1);
-        setUsers(mockUsers.filter(u => u.user.User.role === Profile.ADMIN || u.user.User.role === Profile.PROFESSIONAL));
-        toast({
-          title: "Usuário Excluído!",
-          description: "O usuário foi excluído com sucesso.",
-        });
-      }
-    }
+    
   };
 
   const handleSave = (data: User) => {
-    const existingUserIndex = mockUsers.findIndex(u => u.user.User.id === data.user.User.id);
-    if (existingUserIndex > -1) {
-      mockUsers[existingUserIndex] = { ...mockUsers[existingUserIndex], ...data };
-    } else {
-      const newUserId = `user-${Date.now()}`;
-      mockUsers.push({ ...data, user: { ...data.user, User: { ...data.user.User, id: newUserId } } });
-    }
-    setUsers(mockUsers.filter(u => u.user.User.role === Profile.ADMIN || u.user.User.role === Profile.PROFESSIONAL));
-    setSelectedUser(null);
+    
   };
   
   const filteredUsers = users.filter(user =>
-    (user.user.User.role === Profile.ADMIN || user.user.User.role === Profile.PROFESSIONAL) &&
-    (user.user.User.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.user.User.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    user.User.id && (
+      (user.User.role  === Profile.ADMIN || user.User.role  === Profile.PROFESSIONAL) &&
+      (user.User.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.User.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
   );
-
+  console.log("Filtered Users:", filteredUsers);
   if (authLoading) {
     return <div className="flex justify-center items-center h-full"><p>Carregando...</p></div>;
   }
 
-  if (currentUser?.user.User.role !== Profile.ADMIN) {
+  if (user?.user.User.role !== Profile.ADMIN) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8">
         <Card className="w-full max-w-md shadow-lg">
@@ -147,11 +157,11 @@ export default function UsersPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {filteredUsers.map((user) => (
               <UserCard 
-                key={user.user.User.id} 
+                key={user.User.role} 
                 user={user} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                currentUserId={currentUser.user.User.id}
+                currentUserId={user.User.id}
               />
             ))}
           </div>

@@ -19,6 +19,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import api from "@/services/api";
 
 const treatmentSchema = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
@@ -34,9 +35,26 @@ interface TreatmentDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (data: Treatment) => void;
-  children?: React.ReactNode; // For the trigger button
+  children?: React.ReactNode;
 }
 
+async function createTreatment(data: TreatmentFormValues) {
+  try {
+    const values = {
+      name: data.name,
+      description: data.description,
+      durationMinutes: data.duration,
+      price: data.price,
+      professionalIds: null
+    }
+    const response = await api.post("/treatments", values);
+    console.log("Treatment created successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error creating treatment:", error);
+    throw new Error("Failed to create treatment");
+  }
+}
 export function TreatmentDialog({ treatment, open, onOpenChange, onSave, children }: TreatmentDialogProps) {
   const { toast } = useToast();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<TreatmentFormValues>({
@@ -53,7 +71,22 @@ export function TreatmentDialog({ treatment, open, onOpenChange, onSave, childre
   }, [treatment, reset, open]);
 
 
-  const onSubmit = (data: TreatmentFormValues) => {
+  const onSubmit = async (data: TreatmentFormValues) => {
+    try {
+      await createTreatment(data)
+      toast({
+        title: "Tratamento cadastrado com sucesso!",
+        description: data.name,
+        variant: "default",
+      });
+    } catch (error: any) {
+      console.error("Error creating treatment:", error);
+      toast({
+        title: "Erro ao criar conta",
+        description: error.response?.data?.message || "Ocorreu um erro ao criar sua conta. Tente novamente.",
+        variant: "destructive",
+      });
+    }
     onSave({ ...treatment, id: treatment?.id || `treat-${Date.now()}`, ...data });
     toast({
         title: treatment ? "Tratamento Atualizado!" : "Tratamento Criado!",

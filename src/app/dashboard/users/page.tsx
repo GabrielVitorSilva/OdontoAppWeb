@@ -27,15 +27,15 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    if (!authLoading && currentUser?.role !== Profile.ADMIN) {
+    if (!authLoading && currentUser?.user.User.role !== Profile.ADMIN) {
       toast({
         title: "Acesso Negado",
         description: "Você não tem permissão para acessar esta página.",
         variant: "destructive",
       });
       router.push("/dashboard");
-    } else if (!authLoading && currentUser?.role === Profile.ADMIN) {
-      setUsers(mockUsers.filter(u => u.role === Profile.ADMIN || u.role === Profile.PROFESSIONAL));
+    } else if (!authLoading && currentUser?.user.User.role === Profile.ADMIN) {
+      setUsers(mockUsers.filter(u => u.user.User.role === Profile.ADMIN || u.user.User.role === Profile.PROFESSIONAL));
     }
   }, [currentUser, authLoading, router, toast]);
 
@@ -50,7 +50,7 @@ export default function UsersPage() {
   };
 
   const handleDelete = (userId: string) => {
-    if (currentUser?.id === userId) {
+    if (currentUser?.user.User.id === userId) {
       toast({
         title: "Ação Inválida",
         description: "Você não pode excluir sua própria conta.",
@@ -59,8 +59,8 @@ export default function UsersPage() {
       return;
     }
     if (window.confirm("Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.")) {
-      const userToDelete = mockUsers.find(u => u.id === userId);
-      if (userToDelete?.email === 'gabrieldatas2004@gmail.com') {
+      const userToDelete = mockUsers.find(u => u.user.User.id === userId);
+      if (currentUser?.user.User.email === 'gabrieldatas2004@gmail.com') {
           toast({
             title: "Ação Inválida",
             description: "A conta root do administrador não pode ser excluída.",
@@ -69,10 +69,10 @@ export default function UsersPage() {
           return;
       }
       
-      const userIndex = mockUsers.findIndex(u => u.id === userId);
+      const userIndex = mockUsers.findIndex(u => u.user.User.id === userId);
       if (userIndex > -1) {
         mockUsers.splice(userIndex, 1);
-        setUsers(mockUsers.filter(u => u.role === Profile.ADMIN || u.role === Profile.PROFESSIONAL));
+        setUsers(mockUsers.filter(u => u.user.User.role === Profile.ADMIN || u.user.User.role === Profile.PROFESSIONAL));
         toast({
           title: "Usuário Excluído!",
           description: "O usuário foi excluído com sucesso.",
@@ -82,28 +82,28 @@ export default function UsersPage() {
   };
 
   const handleSave = (data: User) => {
-    const existingUserIndex = mockUsers.findIndex(u => u.id === data.id);
-    if (existingUserIndex > -1) { // Editing existing user
-      mockUsers[existingUserIndex] = { ...mockUsers[existingUserIndex], ...data, password: mockUsers[existingUserIndex].password }; // Keep original password if not changed
-    } else { // Adding new user
+    const existingUserIndex = mockUsers.findIndex(u => u.user.User.id === data.user.User.id);
+    if (existingUserIndex > -1) {
+      mockUsers[existingUserIndex] = { ...mockUsers[existingUserIndex], ...data };
+    } else {
       const newUserId = `user-${Date.now()}`;
-      mockUsers.push({ ...data, id: newUserId });
+      mockUsers.push({ ...data, user: { ...data.user, User: { ...data.user.User, id: newUserId } } });
     }
-    setUsers(mockUsers.filter(u => u.role === Profile.ADMIN || u.role === Profile.PROFESSIONAL));
+    setUsers(mockUsers.filter(u => u.user.User.role === Profile.ADMIN || u.user.User.role === Profile.PROFESSIONAL));
     setSelectedUser(null);
   };
   
   const filteredUsers = users.filter(user =>
-    (user.role === Profile.ADMIN || user.role === Profile.PROFESSIONAL) &&
-    (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    (user.user.User.role === Profile.ADMIN || user.user.User.role === Profile.PROFESSIONAL) &&
+    (user.user.User.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.user.User.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (authLoading) {
     return <div className="flex justify-center items-center h-full"><p>Carregando...</p></div>;
   }
 
-  if (currentUser?.role !== Profile.ADMIN) {
+  if (currentUser?.user.User.role !== Profile.ADMIN) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8">
         <Card className="w-full max-w-md shadow-lg">
@@ -147,11 +147,11 @@ export default function UsersPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {filteredUsers.map((user) => (
               <UserCard 
-                key={user.id} 
+                key={user.user.User.id} 
                 user={user} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                currentUserId={currentUser.id}
+                currentUserId={currentUser.user.User.id}
               />
             ))}
           </div>

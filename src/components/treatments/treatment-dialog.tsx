@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Treatment } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
@@ -55,6 +55,24 @@ async function createTreatment(data: TreatmentFormValues) {
     throw new Error("Failed to create treatment");
   }
 }
+
+async function updateTreatment(id: string, data: TreatmentFormValues) {
+  try {
+    const values = {
+      name: data.name,
+      description: data.description,
+      durationMinutes: data.duration,
+      price: data.price
+    }
+    const response = await api.put(`/treatments/${id}`, values);
+    console.log("Treatment updated successfully:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error updating treatment:", error);
+    throw new Error("Failed to update treatment");
+  }
+}
+
 export function TreatmentDialog({ treatment, open, onOpenChange, onSave, children }: TreatmentDialogProps) {
   const { toast } = useToast();
   const { register, handleSubmit, reset, formState: { errors } } = useForm<TreatmentFormValues>({
@@ -73,26 +91,31 @@ export function TreatmentDialog({ treatment, open, onOpenChange, onSave, childre
 
   const onSubmit = async (data: TreatmentFormValues) => {
     try {
-      await createTreatment(data)
-      toast({
-        title: "Tratamento cadastrado com sucesso!",
-        description: data.name,
-        variant: "default",
-      });
+      if (treatment) {
+        await updateTreatment(treatment.id, data);
+        toast({
+          title: "Tratamento atualizado com sucesso!",
+          description: data.name,
+          variant: "default",
+        });
+      } else {
+        await createTreatment(data);
+        toast({
+          title: "Tratamento cadastrado com sucesso!",
+          description: data.name,
+          variant: "default",
+        });
+      }
+      onSave({ ...treatment, id: treatment?.id || `treat-${Date.now()}`, ...data });
+      onOpenChange(false);
     } catch (error: any) {
-      console.error("Error creating treatment:", error);
+      console.error("Error saving treatment:", error);
       toast({
-        title: "Erro ao criar conta",
-        description: error.response?.data?.message || "Ocorreu um erro ao criar sua conta. Tente novamente.",
+        title: "Erro ao salvar tratamento",
+        description: error.response?.data?.message || "Ocorreu um erro ao salvar o tratamento. Tente novamente.",
         variant: "destructive",
       });
     }
-    onSave({ ...treatment, id: treatment?.id || `treat-${Date.now()}`, ...data });
-    toast({
-        title: treatment ? "Tratamento Atualizado!" : "Tratamento Criado!",
-        description: `O tratamento "${data.name}" foi salvo com sucesso.`,
-    });
-    onOpenChange(false);
   };
 
   return (

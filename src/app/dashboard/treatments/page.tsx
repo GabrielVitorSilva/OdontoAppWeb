@@ -1,9 +1,7 @@
-
 'use client';
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { mockTreatments } from "@/lib/mock-data";
 import { Profile, type Treatment } from "@/types";
 import { PlusCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
@@ -44,7 +42,7 @@ export default function TreatmentsPage() {
   }
   useEffect(() => {
     fetchTreatments()
-  }, [treatments, setTreatments]);
+  }, []);
 
   const isAdmin = user?.user.User.role === Profile.ADMIN;
 
@@ -55,6 +53,7 @@ export default function TreatmentsPage() {
   };
 
   const handleEdit = (treatment: Treatment) => {
+    console.log("Editing treatment:", treatment);
     if (!isAdmin) return; 
     setSelectedTreatment(treatment);
     setIsDialogOpen(true);
@@ -72,14 +71,19 @@ export default function TreatmentsPage() {
     }
   };
 
-  const handleSave = (data: Treatment) => {
+  const handleSave = async (data: Treatment) => {
     if (!isAdmin) return; 
-    if (selectedTreatment) {
-      setTreatments(prev => prev.map(t => t.id === data.id ? data : t));
-    } else {
-      setTreatments(prev => [...prev, data]);
+    try {
+      await fetchTreatments(); 
+      setSelectedTreatment(null);
+    } catch (error) {
+      console.error("Erro ao atualizar lista de tratamentos:", error);
+      toast({
+        title: "Erro ao atualizar lista",
+        description: "Não foi possível atualizar a lista de tratamentos.",
+        variant: "destructive",
+      });
     }
-    setSelectedTreatment(null);
   };
 
   const filteredTreatments = treatments.filter(treatment =>

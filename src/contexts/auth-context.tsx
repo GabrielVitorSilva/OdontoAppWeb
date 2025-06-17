@@ -4,6 +4,7 @@
 import type { User } from '@/types';
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import { mockUsers } from '@/lib/mock-data'; // For demo purposes
+import api from '@/services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -33,8 +34,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = (email: string, password?: string) => {
+  const login = async (email: string, password?: string) => {
     setLoading(true);
+    const response = await api.post('/sessions',{
+      email,
+      password
+    })
+    localStorage.setItem('odontoAccessToken', response.data.token);
+    console.log(response.data);
+    return
     let userToLogin: User | null = null;
 
     if (email === 'gabrieldatas2004@gmail.com') {

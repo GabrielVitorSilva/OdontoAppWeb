@@ -30,9 +30,6 @@ export function LoginForm() {
 
   const onSubmit = (data: LoginFormValues) => {
     login(data.email, data.password);
-    // Router push should ideally happen based on successful login state change in AuthContext
-    // For now, it optimistically pushes. This might be handled by useEffect in DashboardLayout.
-    // router.push('/dashboard'); 
   };
 
   return (

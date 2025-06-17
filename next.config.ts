@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'https://odonto.lat/:path*',
+      },
+    ];
+  },
 };
 
 export default nextConfig;

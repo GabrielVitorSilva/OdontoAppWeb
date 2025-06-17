@@ -8,7 +8,7 @@ import { mockUsers } from '@/lib/mock-data'; // For demo purposes
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  login: (email: string, role: User['role'], password?: string) => void;
+  login: (email: string, password?: string) => void;
   logout: () => void;
   loading: boolean;
 }
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
-  const login = (email: string, role: User['role'], password?: string) => {
+  const login = (email: string, password?: string) => {
     setLoading(true);
     let userToLogin: User | null = null;
 
@@ -51,10 +51,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } else {
       // Standard user login or new client registration (from signup form)
-      userToLogin = mockUsers.find(u => u.email === email && u.role === role) || null;
+      userToLogin = mockUsers.find(u => u.email === email) || null;
 
       // Signup form only creates 'client' role users
-      if (!userToLogin && role === 'client') {
+      if (!userToLogin) {
         const newClient: User = { 
           id: `user-${Date.now()}`, 
           name: email.split('@')[0], // Simple name generation
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } catch (error) {
         console.error("Failed to remove user from localStorage", error);
       }
-      console.warn(`Login attempt failed for ${email} with role ${role}. User not found or credentials/role mismatch.`);
+      console.warn(`Login attempt failed for ${email}. User not found or credentials/role mismatch.`);
       // Optionally, you could use a toast notification here to inform the user of login failure
     }
     setLoading(false);

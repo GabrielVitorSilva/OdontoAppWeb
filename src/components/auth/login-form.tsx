@@ -16,8 +16,7 @@ import { z } from 'zod'; // Added import
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um email válido." }),
-  password: z.string().min(1, { message: "A senha é obrigatória." }), // Can be min 1 if auth logic doesn't strictly enforce length for existing users
-  role: z.enum(['admin', 'professional', 'client'], { message: "Por favor, selecione um tipo de usuário."}),
+  password: z.string().min(1, { message: "A senha é obrigatória." }),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -25,12 +24,12 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
-  const { register, handleSubmit, formState: { errors }, control } = useForm<LoginFormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
 
   const onSubmit = (data: LoginFormValues) => {
-    login(data.email, data.role as User['role'], data.password);
+    login(data.email, data.password);
     // Router push should ideally happen based on successful login state change in AuthContext
     // For now, it optimistically pushes. This might be handled by useEffect in DashboardLayout.
     // router.push('/dashboard'); 
@@ -54,7 +53,7 @@ export function LoginForm() {
             <Input id="password" type="password" placeholder="********" {...register('password')} />
             {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
-           <div className="space-y-2">
+           {/* <div className="space-y-2">
             <Label htmlFor="role">Tipo de Usuário</Label>
             <Controller
               name="role"
@@ -73,7 +72,7 @@ export function LoginForm() {
               )}
             />
             {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
-          </div>
+          </div> */}
           <Button type="submit" className="w-full">Entrar</Button>
         </form>
       </CardContent>

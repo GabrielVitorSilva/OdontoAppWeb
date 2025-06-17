@@ -45,7 +45,7 @@ async function createTreatment(data: TreatmentFormValues) {
       description: data.description,
       durationMinutes: data.duration,
       price: data.price,
-      professionalIds: null
+      professionalIds: []
     }
     const response = await api.post("/treatments", values);
     console.log("Treatment created successfully:", response.data);

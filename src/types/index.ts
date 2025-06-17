@@ -37,6 +37,7 @@ export interface fetchAllUsersByIdResponse {
     id: string;
     name: string;
     email: string;
+    cpf: string;
     role: Profile;
   }
   profileData: {

@@ -18,10 +18,13 @@ import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
+import api from "@/services/api";
+import { formatCPF } from "../auth/signup-form";
 
 const userSchemaBase = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
   email: z.string().email("Formato de email inválido."),
+  cpf: z.string(),
   role: z.enum([Profile.ADMIN, Profile.PROFESSIONAL, Profile.CLIENT], {
     errorMap: () => ({ message: "Selecione um tipo de usuário válido (Admin ou Profissional)." })
   }),
@@ -40,6 +43,7 @@ const editUserSchema = userSchemaBase;
 type FormValues = {
   name: string;
   email: string;
+  cpf: string;
   role: Profile;
   password?: string;
   confirmPassword?: string;
@@ -52,21 +56,25 @@ interface UserDialogProps {
   onSave: (data: User) => void;
 }
 
+
+
 export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps) {
   const { toast } = useToast();
   const isEditing = !!user;
 
-  const { control, register, handleSubmit, reset, watch, formState: { errors } } = useForm<FormValues>({
+  const { control, register, handleSubmit, reset, watch, formState: { errors }, setValue } = useForm<FormValues>({
     resolver: zodResolver(isEditing ? editUserSchema : newUserSchema),
     defaultValues: isEditing ? {
       name: user.User.name,
       email: user.User.email,
       role: user.User.role,
+      cpf: user.User.cpf
     } : {
       name: "",
       email: "",
       role: Profile.PROFESSIONAL,
       password: "",
+      cpf: "",
       confirmPassword: "",
     }
   });
@@ -91,27 +99,39 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
     }
   }, [user, open, reset]);
 
-  const onSubmit = (data: FormValues) => {
+  const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatCPF(e.target.value);
+    setValue('cpf', formattedValue);
+  };
+
+  const onSubmit = async (data: FormValues) => {
     try {
-      const userData: User = {
-        user: {
-          User: {
-            id: user?.User.id || "",
-            name: data.name,
-            email: data.email,
-            role: data.role,
-          },
-          profileData: user?.profileData || {
-            id: "",
-            userId: "",
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }
-        }
-      };
-      onSave(userData);
+      const values = {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        cpf: data.cpf.replace(/\D/g, ''), 
+        password: '123@Senha'
+      }
+      const response = await api.post("/register", values)
+      console.log("User created successfully:", response.data);
+      
+      toast({
+        title: "Cadastro de usuário realizado com sucesso!",
+        description: "Usuário criado com sucesso.",
+        variant: "default",
+      });
       onOpenChange(false);
-    } catch (error) {
+    } catch (error:any) {
+      console.error("Error saving user:", error.response?.data.message || error.message);
+      if(error.response?.data?.message) {
+        toast({
+          title: "Erro ao salvar usuário",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+        return
+      }
       toast({
         title: "Erro ao salvar usuário",
         description: "Ocorreu um erro ao tentar salvar o usuário.",
@@ -137,8 +157,13 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
           </div>
           <div>
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register("email")} disabled={isEditing && user?.User.email === 'gabrieldatas2004@gmail.com'}/>
+            <Input id="email" type="email" {...register("email")}/>
              {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
+          </div>
+          <div>
+            <Label htmlFor="email">Cpf</Label>
+            <Input id="cpf" type="cpf" {...register("cpf")} onChange={handleCPFChange}/>
+             {errors.cpf && <p className="text-sm text-destructive mt-1">{errors.cpf.message}</p>}
           </div>
           
           {!isEditing && (
@@ -171,8 +196,9 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
                     <SelectValue placeholder="Selecione o tipo" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="professional">Profissional</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
+                    <SelectItem value={Profile.PROFESSIONAL}>Profissional</SelectItem>
+                    <SelectItem value={Profile.ADMIN}>Administrador</SelectItem>
+                    <SelectItem value={Profile.CLIENT}>Cliente</SelectItem>
                   </SelectContent>
                 </Select>
               )}

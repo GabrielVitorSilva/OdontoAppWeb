@@ -107,7 +107,6 @@ export default function UsersPage() {
   
   const filteredUsers = users.filter(user =>
     user.User.id && (
-      (user.User.role  === Profile.ADMIN || user.User.role  === Profile.PROFESSIONAL) &&
       (user.User.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.User.email.toLowerCase().includes(searchTerm.toLowerCase()))
     )

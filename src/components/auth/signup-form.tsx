@@ -27,7 +27,7 @@ const signupSchema = z.object({
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
-const formatCPF = (value: string) => {
+export const formatCPF = (value: string) => {
   const numbers = value.replace(/\D/g, '');
   
   const limitedNumbers = numbers.slice(0, 11);

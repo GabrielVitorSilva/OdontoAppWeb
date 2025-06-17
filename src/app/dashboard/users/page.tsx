@@ -115,12 +115,16 @@ export default function UsersPage() {
         description: error.response?.data?.message || "Não foi possível excluir o usuário.",
         variant: "destructive",
       });
-      
+
     }
   };
 
-  const handleSave = (data: User) => {
-    
+  const handleSave = async (data: User) => {
+    try {
+      await fetchUsers();
+    } catch (error) {
+      console.error("Erro ao atualizar lista de usuários:", error);
+    }
   };
   
   const filteredUsers = users.filter(user =>

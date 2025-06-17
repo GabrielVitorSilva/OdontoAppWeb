@@ -56,12 +56,9 @@ interface UserDialogProps {
   onSave: (data: User) => void;
 }
 
-
-
 export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps) {
   const { toast } = useToast();
   const isEditing = !!user;
-
   const { control, register, handleSubmit, reset, watch, formState: { errors }, setValue } = useForm<FormValues>({
     resolver: zodResolver(isEditing ? editUserSchema : newUserSchema),
     defaultValues: isEditing ? {
@@ -86,6 +83,7 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
           name: user.User.name,
           email: user.User.email,
           role: user.User.role,
+          cpf: formatCPF(user.User.cpf)
         });
       } else {
         reset({
@@ -93,6 +91,7 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
           email: "",
           role: Profile.PROFESSIONAL,
           password: "",
+          cpf: "",
           confirmPassword: "",
         });
       }
@@ -110,17 +109,27 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
         name: data.name,
         email: data.email,
         role: data.role,
-        cpf: data.cpf.replace(/\D/g, ''), 
+        cpf: data.cpf.replace(/\D/g, ''),
         password: '123@Senha'
       }
-      const response = await api.post("/register", values)
-      console.log("User created successfully:", response.data);
-      
-      toast({
-        title: "Cadastro de usuário realizado com sucesso!",
-        description: "Usuário criado com sucesso.",
-        variant: "default",
-      });
+      if (isEditing && user) {
+        const response = await api.put(`/users/${user.User.id}`, values);
+        console.log("User updated:", response.data);
+        toast({
+          title: "Usuário atualizado com sucesso!",
+          description: "As alterações foram salvas.",
+          variant: "default",
+        });
+        onSave(response.data.user);
+      } else {
+        const response = await api.post("/register", values);
+        toast({
+          title: "Cadastro de usuário realizado com sucesso!",
+          description: "Usuário criado com sucesso.",
+          variant: "default",
+        });
+        onSave(response.data.user);
+      }
       onOpenChange(false);
     } catch (error:any) {
       console.error("Error saving user:", error.response?.data.message || error.message);

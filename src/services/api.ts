@@ -14,7 +14,6 @@ const api = axios.create({
 api.interceptors.request.use(async (config) => {
   try {
     const token = localStorage.getItem('odontoAccessToken');
-    console.log('Token no interceptor:', token);
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -32,14 +31,12 @@ api.interceptors.request.use(async (config) => {
 // Interceptor para tratar erros de resposta
 api.interceptors.response.use(
   (response) => {
-    console.log('Resposta da API:', response.status);
     return response;
   },
   (error) => {
     console.error('Erro na resposta da API:', error.response?.status, error.response?.data);
     
     if (error.response?.status === 401) {
-      console.log('Token inválido ou expirado, redirecionando para login...');
       localStorage.removeItem('odontoAccessToken');
       localStorage.removeItem('odontoUser');
       window.location.href = '/auth/login';

@@ -27,9 +27,7 @@ export function LoginForm() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      console.log('Iniciando login com:', data.email);
-      await login(data.email, data.password);
-      console.log('Login realizado com sucesso');
+      login(data.email, data.password);
       router.push('/dashboard');
     } catch (error) {
       console.error('Erro ao fazer login:', error);

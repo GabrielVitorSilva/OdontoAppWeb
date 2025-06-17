@@ -13,7 +13,6 @@ import { useEffect } from 'react';
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
-  console.log('isAuthenticated:', isAuthenticated);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,7 +29,6 @@ export default function LandingPage() {
     );
   }
 
-  // If authenticated, router.push will handle redirect, this is a fallback or for when JS is disabled (though JS is needed for redirect)
   if (isAuthenticated) return null;
 
 

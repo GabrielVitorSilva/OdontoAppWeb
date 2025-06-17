@@ -8,7 +8,6 @@ import React, { useEffect } from "react";
 
 export default function LoginPage() {
   const { isAuthenticated, loading, user } = useAuth();
-  console.log('user:', user);
   const router = useRouter();
 
   useEffect(() => {
@@ -21,7 +20,6 @@ export default function LoginPage() {
     redirectIfAuthenticated();
   }, [isAuthenticated, router]);
 
-  // Mostra tela de carregamento enquanto verifica autenticação
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background to-blue-100 p-4">
@@ -33,7 +31,6 @@ export default function LoginPage() {
     );
   }
 
-  // Se não estiver carregando e não estiver autenticado, mostra o formulário de login
   if (!isAuthenticated) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background to-blue-100 p-4">
@@ -45,7 +42,6 @@ export default function LoginPage() {
     );
   }
 
-  // Se estiver autenticado, mostra tela de carregamento enquanto redireciona
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-background to-blue-100 p-4">
       <div className="mb-8">

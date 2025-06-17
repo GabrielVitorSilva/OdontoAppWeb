@@ -18,7 +18,6 @@ function getInitials(name: string) {
   return names.length > 1 ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase() : name.substring(0, 2).toUpperCase();
 }
 const {user} = useAuth()
-console.log('User in ClientDetailView:', user);
 export function ClientDetailView({ client, appointments }: ClientDetailViewProps) {
   const clientAppointments = appointments.filter(appt => appt.clientId === client.id)
     .sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());

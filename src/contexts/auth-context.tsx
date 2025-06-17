@@ -2,7 +2,6 @@
 
 import type { User } from '@/types';
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
-import { mockUsers } from '@/lib/mock-data'; // For demo purposes
 import api from '@/services/api';
 
 interface AuthContextType {

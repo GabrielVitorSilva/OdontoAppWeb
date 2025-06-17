@@ -19,13 +19,13 @@ export function AppointmentCard({ appointment, onEdit, onDelete }: AppointmentCa
   const statusVariant = {
     SCHEDULED: "default",
     COMPLETED: "secondary", 
-    CANCELLED: "destructive",
+    CANCELED: "destructive",
   } as const;
   
   const statusText = {
     SCHEDULED: "Agendada",
     COMPLETED: "Concluída",
-    CANCELLED: "Cancelada",
+    CANCELED: "Cancelada",
   };
 
   return (

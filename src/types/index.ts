@@ -68,7 +68,7 @@ export interface Appointment {
 export enum AppointmentStatus {
   SCHEDULED = 'SCHEDULED',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
+  CANCELED = 'CANCELED',
 }
 export interface Client {
   id: string;

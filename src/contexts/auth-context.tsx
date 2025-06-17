@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { User } from '@/types';
@@ -35,66 +34,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password?: string) => {
-    setLoading(true);
-    const response = await api.post('/sessions',{
-      email,
-      password
-    })
-    localStorage.setItem('odontoAccessToken', response.data.token);
-    const profile = await api.post('/me');
-    console.log(profile.data);
-    return
-    let userToLogin: User | null = null;
-
-    if (email === 'gabrieldatas2004@gmail.com') {
-      // Root admin login
-      const rootAdmin = mockUsers.find(u => u.email === 'gabrieldatas2004@gmail.com' && u.role === 'admin');
-      if (rootAdmin) {
-        // In a real app, you would validate the password here (e.g. check if password === '123456')
-        userToLogin = rootAdmin;
+    try {
+      setLoading(true);
+      const response = await api.post('/sessions',{
+        email,
+        password
+      })
+      localStorage.setItem('odontoAccessToken', response.data.token);
+      const profile = await api.post('/me');
+      setUser(profile.data);
+      localStorage.setItem('odontoUser', JSON.stringify(profile.data));
+    } catch (error: any) {
+      console.error("Login failed", error);
+      if (error.response && error.response.status === 401) {
+        alert("Email ou senha inválidos.");
       } else {
-        // This case should ideally not happen if mock-data.ts is correct
-        console.error("Root admin user (gabrieldatas2004@gmail.com) not found in mock-data.ts. Please ensure it's defined.");
-        // Fallback for safety, creates a temporary root admin object if not found in mocks
-        userToLogin = { id: 'user-root-admin-fallback', name: 'Gabriel Datas (Fallback)', email: 'gabrieldatas2004@gmail.com', role: 'admin', password: password };
+        alert("Ocorreu um erro ao tentar fazer login. Por favor, tente novamente.");
       }
-    } else {
-      // Standard user login or new client registration (from signup form)
-      userToLogin = mockUsers.find(u => u.email === email) || null;
-
-      // Signup form only creates 'client' role users
-      if (!userToLogin) {
-        const newClient: User = { 
-          id: `user-${Date.now()}`, 
-          name: email.split('@')[0], // Simple name generation
-          email, 
-          role: 'client',
-          password: password // Store password from signup for the new mock user
-        };
-        mockUsers.push(newClient); // Add to mockUsers array for demo persistence
-        userToLogin = newClient;
-      }
+      return;
+    } finally {
+      setLoading(false);
     }
-    
-    if (userToLogin) {
-      setUser(userToLogin);
-      try {
-        localStorage.setItem('odontoUser', JSON.stringify(userToLogin));
-      } catch (error) {
-         console.error("Failed to save user to localStorage", error);
-      }
-    } else {
-      // Login failed for existing user attempt (not a new client signup)
-      setUser(null); // Explicitly set user to null
-      try {
-        localStorage.removeItem('odontoUser'); // Clear any erroneous stored user
-      } catch (error) {
-        console.error("Failed to remove user from localStorage", error);
-      }
-      console.warn(`Login attempt failed for ${email}. User not found or credentials/role mismatch.`);
-      // Optionally, you could use a toast notification here to inform the user of login failure
-    }
-    setLoading(false);
   };
 
   const logout = () => {

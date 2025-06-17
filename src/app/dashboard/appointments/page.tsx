@@ -13,8 +13,11 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO, isFuture, isPast, isToday } from "date-fns";
+import api from "@/services/api";
+import { useAuth } from "@/contexts/auth-context";
 
 export default function AppointmentsPage() {
+  const {user} = useAuth()
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
@@ -22,9 +25,30 @@ export default function AppointmentsPage() {
   const [activeTab, setActiveTab] = useState("upcoming");
   const { toast } = useToast();
 
+
+  async function fetchAppointments() {
+    try {
+      const response = await api.get(`/users/${user?.user.User.id}/consultations`);
+      setAppointments(response.data.consultations);
+    } catch (error: any) {
+      console.error("Error fetching appointments:", error);
+      if(error.response?.data?.message) {
+        toast({
+          title: "Erro ao buscar consultas",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+      }
+      toast({
+        title: "Erro ao buscar consultas",
+        description: error.response?.data?.message || "Ocorreu um erro ao buscar as consultas.",
+        variant: "destructive",
+      });
+    }
+  }
+
   useEffect(() => {
-    // Simulate fetching data
-    setAppointments(mockAppointments.sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime() || a.time.localeCompare(b.time)));
+    fetchAppointments();
   }, []);
 
   const handleAddNew = () => {
@@ -38,32 +62,19 @@ export default function AppointmentsPage() {
   };
 
   const handleDelete = (appointmentId: string) => {
-    if (window.confirm("Tem certeza que deseja excluir esta consulta?")) {
-      setAppointments(prev => prev.filter(a => a.id !== appointmentId));
-      toast({
-        title: "Consulta Excluída!",
-        description: "A consulta foi excluída com sucesso.",
-        variant: "destructive",
-      });
-    }
+    
   };
 
   const handleSave = (data: Appointment) => {
-    if (selectedAppointment) {
-      setAppointments(prev => prev.map(a => a.id === data.id ? data : a).sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime() || a.time.localeCompare(b.time)));
-    } else {
-      setAppointments(prev => [...prev, data].sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime() || a.time.localeCompare(b.time)));
-    }
-    setSelectedAppointment(null);
   };
 
   const getFilteredAppointments = () => {
     let filtered = appointments;
-    if (activeTab === "upcoming") {
-      filtered = appointments.filter(appt => (isFuture(parseISO(appt.date)) || isToday(parseISO(appt.date))) && appt.status === 'scheduled');
-    } else if (activeTab === "past") {
-      filtered = appointments.filter(appt => isPast(parseISO(appt.date)) || appt.status !== 'scheduled');
-    } // "all" tab shows all
+    // if (activeTab === "upcoming") {
+    //   filtered = appointments.filter(appt => (isFuture(parseISO(appt.date)) || isToday(parseISO(appt.date))) && appt.status === 'scheduled');
+    // } else if (activeTab === "past") {
+    //   filtered = appointments.filter(appt => isPast(parseISO(appt.date)) || appt.status !== 'scheduled');
+    // } // "all" tab shows all
 
     return filtered.filter(appointment =>
       appointment.clientName?.toLowerCase().includes(searchTerm.toLowerCase()) ||

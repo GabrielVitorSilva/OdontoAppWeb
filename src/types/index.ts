@@ -58,18 +58,18 @@ export interface Treatment {
 
 export interface Appointment {
   id: string;
-  clientId: string;
-  clientName?: string;
-  professionalId: string;
-  professionalName?: string;
-  treatmentId: string;
-  treatmentName?: string;
-  date: string; // ISO string for date part
-  time: string; // HH:MM for time part
-  status: 'scheduled' | 'completed' | 'cancelled';
-  notes?: string;
+  clientName: string;
+  professionalName: string;
+  treatmentName: string;
+  dateTime: string; 
+  status: AppointmentStatus;
 }
 
+export enum AppointmentStatus {
+  SCHEDULED = 'SCHEDULED',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
+}
 export interface Client {
   id: string;
   name: string;

@@ -13,18 +13,19 @@ interface AppointmentCardProps {
 }
 
 export function AppointmentCard({ appointment, onEdit, onDelete }: AppointmentCardProps) {
-  const formattedDate = format(parseISO(appointment.date), "PPP", { locale: ptBR });
+  const formattedDate = format(parseISO(appointment.dateTime), "PPP", { locale: ptBR });
+  const formattedTime = format(parseISO(appointment.dateTime), "HH:mm", { locale: ptBR });
   
   const statusVariant = {
-    scheduled: "default",
-    completed: "secondary", // Consider a success-like color from theme if available or a custom one
-    cancelled: "destructive",
+    SCHEDULED: "default",
+    COMPLETED: "secondary", 
+    CANCELLED: "destructive",
   } as const;
   
   const statusText = {
-    scheduled: "Agendada",
-    completed: "Concluída",
-    cancelled: "Cancelada",
+    SCHEDULED: "Agendada",
+    COMPLETED: "Concluída",
+    CANCELLED: "Cancelada",
   };
 
   return (
@@ -49,14 +50,14 @@ export function AppointmentCard({ appointment, onEdit, onDelete }: AppointmentCa
         </div>
         <div className="flex items-center text-muted-foreground">
           <Clock className="w-4 h-4 mr-2" />
-          <span>Hora: {appointment.time}</span>
+          <span>Hora: {formattedTime}</span>
         </div>
-        {appointment.notes && (
+        {/* {appointment.notes && (
           <div className="pt-2">
             <p className="text-xs font-semibold">Observações:</p>
             <p className="text-xs text-muted-foreground italic line-clamp-2">{appointment.notes}</p>
           </div>
-        )}
+        )} */}
       </CardContent>
       <CardFooter className="flex justify-end gap-2 border-t pt-4">
         <Button variant="outline" size="sm" onClick={() => onEdit(appointment)}>

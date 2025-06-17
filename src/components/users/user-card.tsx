@@ -24,7 +24,10 @@ export function UserCard({ user, onEdit, onDelete, currentUserId }: UserCardProp
             <CardTitle className="font-headline text-xl">{user.User.name}</CardTitle>
             <CardDescription className="flex items-center">
               <RoleIcon className="w-4 h-4 mr-1.5 text-muted-foreground" />
-              {user.User.role || "Usuário"}
+              {
+              user.User.role === Profile.ADMIN ? 'Administrador' : user.User.role === Profile.CLIENT ? 'Cliente' :
+               "Profissional"
+              }
             </CardDescription>
           </div>
         </div>

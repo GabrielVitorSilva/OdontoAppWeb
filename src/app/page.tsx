@@ -13,6 +13,7 @@ import { useEffect } from 'react';
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
+  console.log('isAuthenticated:', isAuthenticated);
   const router = useRouter();
 
   useEffect(() => {

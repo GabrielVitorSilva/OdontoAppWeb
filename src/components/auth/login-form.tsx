@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
-import { useForm, Controller } from 'react-hook-form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import type { User } from "@/types";
-import { z } from 'zod'; // Added import
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Por favor, insira um email válido." }),
@@ -24,12 +21,19 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 export function LoginForm() {
   const router = useRouter();
   const { login } = useAuth();
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    login(data.email, data.password);
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      console.log('Iniciando login com:', data.email);
+      await login(data.email, data.password);
+      console.log('Login realizado com sucesso');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Erro ao fazer login:', error);
+    }
   };
 
   return (
@@ -50,27 +54,9 @@ export function LoginForm() {
             <Input id="password" type="password" placeholder="********" {...register('password')} />
             {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
-           {/* <div className="space-y-2">
-            <Label htmlFor="role">Tipo de Usuário</Label>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger id="role">
-                    <SelectValue placeholder="Selecione o tipo de usuário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="client">Cliente</SelectItem>
-                    <SelectItem value="professional">Profissional</SelectItem>
-                    <SelectItem value="admin">Administrador</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-            {errors.role && <p className="text-sm text-destructive">{errors.role.message}</p>}
-          </div> */}
-          <Button type="submit" className="w-full">Entrar</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Entrando...' : 'Entrar'}
+          </Button>
         </form>
       </CardContent>
       <CardFooter className="flex flex-col items-center gap-2">

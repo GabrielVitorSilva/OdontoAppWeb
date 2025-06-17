@@ -51,8 +51,8 @@ export function UserNav() {
     return null; 
   }
 
-  const displayName = user.name || 'Usuário'; // Fallback for display
-  const initials = getInitials(user.name); // Use the robust function
+  const displayName = user.user.User.name || 'Usuário'; // Fallback for display
+  const initials = getInitials(user.user.User.name); // Use the robust function
 
   return (
     <DropdownMenu>
@@ -69,7 +69,7 @@ export function UserNav() {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none font-headline">{displayName}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {user.user.User.email}
             </p>
           </div>
         </DropdownMenuLabel>

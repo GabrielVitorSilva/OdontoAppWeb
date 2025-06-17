@@ -6,6 +6,7 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ClientSummarySection } from "./client-summary-section";
 import { Badge } from "../ui/badge";
+import { useAuth } from "@/contexts/auth-context";
 
 interface ClientDetailViewProps {
   client: Client;
@@ -16,7 +17,8 @@ function getInitials(name: string) {
   const names = name.split(' ');
   return names.length > 1 ? `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase() : name.substring(0, 2).toUpperCase();
 }
-
+const {user} = useAuth()
+console.log('User in ClientDetailView:', user);
 export function ClientDetailView({ client, appointments }: ClientDetailViewProps) {
   const clientAppointments = appointments.filter(appt => appt.clientId === client.id)
     .sort((a,b) => parseISO(b.date).getTime() - parseISO(a.date).getTime());
@@ -36,7 +38,7 @@ export function ClientDetailView({ client, appointments }: ClientDetailViewProps
       <Card className="shadow-lg">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <Avatar className="h-20 w-20 text-xl">
-            <AvatarImage src={`https://placehold.co/100x100.png?text=${getInitials(client.name)}`} alt={client.name} data-ai-hint="person avatar" />
+            <AvatarImage src={`https://placehold.co/100x100.png?text=${getInitials(user?.user.User.name ?? '')}`} alt={client.name} data-ai-hint="person avatar" />
             <AvatarFallback>{getInitials(client.name)}</AvatarFallback>
           </Avatar>
           <div className="flex-1">

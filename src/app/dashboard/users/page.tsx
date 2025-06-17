@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { mockUsers } from "@/lib/mock-data";
 import { Profile, type fetchAllUsersByIdResponse, type fetchAllUsersResponse, type User } from "@/types";
-import { PlusCircle, ShieldAlert } from "lucide-react";
+import { PlusCircle, ShieldAlert, Loader2 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { UserCard } from "@/components/users/user-card";
 import { UserDialog } from "@/components/users/user-dialog";
@@ -25,6 +25,7 @@ export default function UsersPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<fetchAllUsersByIdResponse | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function fetchUserById(userId: string) {
     try {
@@ -43,6 +44,7 @@ export default function UsersPage() {
   }
 
   async function fetchUsers() {
+    setIsLoading(true);
     try {
       const response = await api.get("/users");
       const data = response.data.users as fetchAllUsersResponse[];
@@ -62,6 +64,8 @@ export default function UsersPage() {
         variant: "destructive",
       });
       setUsers([]);
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -152,7 +156,12 @@ export default function UsersPage() {
         />
       </div>
       
-      {filteredUsers.length > 0 ? (
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center h-[calc(100vh-280px)]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">Carregando usuários...</p>
+        </div>
+      ) : filteredUsers.length > 0 ? (
         <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {filteredUsers.map((user) => (

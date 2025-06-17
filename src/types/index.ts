@@ -1,9 +1,9 @@
-
 export interface User {
   id: string;
   name: string;
   email: string;
   role: Profile; // Using the Profile enum
+  password?: string; // Optional password field
   // Add any other top-level properties your API returns for a user
 }
 

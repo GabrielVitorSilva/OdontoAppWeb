@@ -1,10 +1,9 @@
-
 "use client";
 
-import type { User, Profile } from '@/types'; // Ensured Profile is imported if used directly
+import type { User } from '@/types';
+import { Profile } from '@/types';
 import React, { createContext, useState, useEffect, ReactNode, useContext } from 'react';
 import api from '@/services/api';
-import { mockUsers } from '@/lib/mock-data'; // For client-side user creation during signup
 
 interface AuthContextType {
   user: User | null;
@@ -52,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Fetch user profile after successful login
       // Ensure the Authorization header is set by the interceptor
-      const profileResponse = await api.get('/me'); 
+      const profileResponse = await api.post('/me'); 
       const apiUser = profileResponse.data;
 
       setUser(apiUser);

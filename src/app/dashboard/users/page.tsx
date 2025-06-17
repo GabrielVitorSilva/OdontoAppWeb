@@ -1,10 +1,10 @@
-
 'use client';
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { mockUsers } from "@/lib/mock-data";
 import type { User } from "@/types";
+import { Profile } from "@/types";
 import { PlusCircle, ShieldAlert } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { UserCard } from "@/components/users/user-card";
@@ -27,16 +27,15 @@ export default function UsersPage() {
   const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    if (!authLoading && currentUser?.role !== 'admin') {
+    if (!authLoading && currentUser?.role !== Profile.ADMIN) {
       toast({
         title: "Acesso Negado",
         description: "Você não tem permissão para acessar esta página.",
         variant: "destructive",
       });
       router.push("/dashboard");
-    } else if (!authLoading && currentUser?.role === 'admin') {
-      // Filter to show only 'admin' and 'professional' users for management
-      setUsers(mockUsers.filter(u => u.role === 'admin' || u.role === 'professional'));
+    } else if (!authLoading && currentUser?.role === Profile.ADMIN) {
+      setUsers(mockUsers.filter(u => u.role === Profile.ADMIN || u.role === Profile.PROFESSIONAL));
     }
   }, [currentUser, authLoading, router, toast]);
 
@@ -73,7 +72,7 @@ export default function UsersPage() {
       const userIndex = mockUsers.findIndex(u => u.id === userId);
       if (userIndex > -1) {
         mockUsers.splice(userIndex, 1);
-        setUsers(mockUsers.filter(u => u.role === 'admin' || u.role === 'professional'));
+        setUsers(mockUsers.filter(u => u.role === Profile.ADMIN || u.role === Profile.PROFESSIONAL));
         toast({
           title: "Usuário Excluído!",
           description: "O usuário foi excluído com sucesso.",
@@ -90,12 +89,12 @@ export default function UsersPage() {
       const newUserId = `user-${Date.now()}`;
       mockUsers.push({ ...data, id: newUserId });
     }
-    setUsers(mockUsers.filter(u => u.role === 'admin' || u.role === 'professional'));
+    setUsers(mockUsers.filter(u => u.role === Profile.ADMIN || u.role === Profile.PROFESSIONAL));
     setSelectedUser(null);
   };
   
   const filteredUsers = users.filter(user =>
-    (user.role === 'admin' || user.role === 'professional') &&
+    (user.role === Profile.ADMIN || user.role === Profile.PROFESSIONAL) &&
     (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -104,7 +103,7 @@ export default function UsersPage() {
     return <div className="flex justify-center items-center h-full"><p>Carregando...</p></div>;
   }
 
-  if (currentUser?.role !== 'admin') {
+  if (currentUser?.role !== Profile.ADMIN) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8">
         <Card className="w-full max-w-md shadow-lg">

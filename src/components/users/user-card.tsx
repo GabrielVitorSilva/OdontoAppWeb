@@ -13,7 +13,7 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, onEdit, onDelete, currentUserId }: UserCardProps) {
-
+  console.log(currentUserId)
   const RoleIcon = user.User.role === Profile.ADMIN ? ShieldCheck : Briefcase;
 
   return (

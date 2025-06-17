@@ -163,13 +163,13 @@ export default function UsersPage() {
       ) : filteredUsers.length > 0 ? (
         <ScrollArea className="h-[calc(100vh-280px)]">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
-            {filteredUsers.map((user) => (
+            {filteredUsers.map((data) => (
               <UserCard 
-                key={user.User.role} 
-                user={user} 
+                key={data.User.role} 
+                user={data} 
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                currentUserId={user.User.id}
+                currentUserId={user.user.User.id}
               />
             ))}
           </div>

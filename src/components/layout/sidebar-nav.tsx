@@ -17,6 +17,7 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
+import { Profile } from '@/types';
 
 const baseNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, adminOnly: false },
@@ -39,7 +40,7 @@ export function SidebarNav() {
 
   const navItems = [
     ...baseNavItems,
-    ...(user?.role === 'admin' ? adminNavItems : [])
+    ...(user?.user.User.role === Profile.ADMIN ? adminNavItems : [])
   ];
 
   return (

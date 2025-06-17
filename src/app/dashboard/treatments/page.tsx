@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/auth-context";
+import api from "@/services/api";
 
 export default function TreatmentsPage() {
   const { user } = useAuth(); 
@@ -22,10 +23,28 @@ export default function TreatmentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
+  async function fetchTreatments() {
+    try {
+      const response = await api.get("/treatments");
+      
+      const data = response.data.treatments as Treatment[];
+      console.log(data);
+      if (Array.isArray(data)) {
+        setTreatments(data);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar tratamentos:", error);
+      toast({
+        title: "Erro ao buscar tratamentos",
+        description: "Não foi possível carregar os tratamentos no momento.",
+        variant: "destructive",
+      });
+      setTreatments([]); 
+    }
+  }
   useEffect(() => {
-    // Simulate fetching data
-    setTreatments(mockTreatments);
-  }, []);
+    fetchTreatments()
+  }, [treatments, setTreatments]);
 
   const isAdmin = user?.user.User.role === Profile.ADMIN;
 

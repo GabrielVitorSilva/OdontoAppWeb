@@ -53,21 +53,30 @@ export default function TreatmentsPage() {
   };
 
   const handleEdit = (treatment: Treatment) => {
-    console.log("Editing treatment:", treatment);
     if (!isAdmin) return; 
     setSelectedTreatment(treatment);
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (treatmentId: string) => {
+  const handleDelete = async (treatmentId: string) => {
     if (!isAdmin) return; 
     if (window.confirm("Tem certeza que deseja excluir este tratamento?")) {
-      setTreatments(prev => prev.filter(t => t.id !== treatmentId));
-      toast({
-        title: "Tratamento Excluído!",
-        description: "O tratamento foi excluído com sucesso.",
-        variant: "destructive",
-      });
+      try {
+        await api.delete(`/treatments/${treatmentId}`);
+        await fetchTreatments();
+        toast({
+          title: "Tratamento Excluído!",
+          description: "O tratamento foi excluído com sucesso.",
+          variant: "destructive",
+        });
+      } catch (error) {
+        console.error("Erro ao excluir tratamento:", error);
+        toast({
+          title: "Erro ao excluir tratamento",
+          description: "Não foi possível excluir o tratamento. Tente novamente.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

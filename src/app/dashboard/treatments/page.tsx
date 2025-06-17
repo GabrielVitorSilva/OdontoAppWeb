@@ -69,8 +69,16 @@ export default function TreatmentsPage() {
           description: "O tratamento foi excluído com sucesso.",
           variant: "destructive",
         });
-      } catch (error) {
+      } catch (error: any) {
         console.error("Erro ao excluir tratamento:", error);
+        if( error.response?.status === 409) {
+          toast({
+            title: "Erro ao excluir tratamento",
+            description: error.response?.data?.message || "Este tratamento está vinculado a agendamentos e não pode ser excluído.",
+            variant: "destructive",
+          });
+          return;
+        }
         toast({
           title: "Erro ao excluir tratamento",
           description: "Não foi possível excluir o tratamento. Tente novamente.",

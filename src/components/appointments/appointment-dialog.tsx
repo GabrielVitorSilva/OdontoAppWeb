@@ -9,33 +9,38 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { mockClients, mockProfessionals, mockTreatments } from "@/lib/mock-data";
-import type { Appointment } from "@/types";
+import { mockTreatments } from "@/lib/mock-data";
+import { AppointmentStatus, Profile, type Appointment, type fetchProfessionalAndClient, type Treatment } from "@/types";
 import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format } from "date-fns";
+import { format, } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
+import api from "@/services/api";
 
-const appointmentSchema = z.object({
-  clientId: z.string().min(1, "Selecione um cliente."),
-  professionalId: z.string().min(1, "Selecione um profissional."),
-  treatmentId: z.string().min(1, "Selecione um tratamento."),
-  date: z.date({ required_error: "A data da consulta é obrigatória." }),
+
+export const appointmentSchema = z.object({
+  id: z.string().uuid(), 
+  clientName: z.string().min(1, "Nome do cliente é obrigatório."),
+  professionalName: z.string().min(1, "Nome do profissional é obrigatório."),
+  treatmentName: z.string().min(1, "Nome do tratamento é obrigatório."),
+  dateTime: z.string().refine(
+    (val) => !isNaN(Date.parse(val)),
+    { message: "Data e hora inválidas (use formato ISO 8601 ou similar)." }
+  ),
   time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato de hora inválido (HH:MM)."),
-  status: z.enum(['scheduled', 'completed', 'cancelled']).default('scheduled'),
-  notes: z.string().optional(),
+  status: z.nativeEnum(AppointmentStatus),
 });
+
 
 type AppointmentFormValues = z.infer<typeof appointmentSchema>;
 
@@ -49,49 +54,123 @@ interface AppointmentDialogProps {
 
 export function AppointmentDialog({ appointment, open, onOpenChange, onSave, children }: AppointmentDialogProps) {
   const { toast } = useToast();
+  const [professionals, setProfessionals] = useState<fetchProfessionalAndClient[]>([]);
+  const [clients, setClients] = useState<fetchProfessionalAndClient[]>([]);
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
+  
+  const [clientSelected, setClientSelected] = useState<fetchProfessionalAndClient>();
+  const [professionalSelected, setProfessionalSelected] = useState<fetchProfessionalAndClient>();
+  const [treatmentSelected, setTreatmentSelected] = useState<Treatment>();
+
   const { control, register, handleSubmit, reset, formState: { errors } } = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
   });
 
+  async function fetchProfessionalsData() {
+    try {
+      const response = await api.get('/professionals');
+      setProfessionals(response.data.professionals);
+    } catch (error:any) {
+      console.error("Erro ao buscar profissionais:", error);
+      toast({
+        title: "Erro ao buscar profissionais",
+        description: error.response?.message,
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function fetchClientsData() {
+    try {
+      const response = await api.get('/clients');
+      setClients(response.data.clients);
+    } catch (error:any) {
+      console.error("Erro ao buscar clientes:", error);
+      toast({
+        title: "Erro ao buscar clientes",
+        description: error.response?.message,
+        variant: "destructive",
+      });
+    }
+  }
+
+  async function fetchTreatmentsData() {
+    try {
+      const response = await api.get('/treatments');
+      setTreatments(response.data.treatments);
+    } catch (error:any) {
+      console.error("Erro ao buscar clientes:", error);
+      toast({
+        title: "Erro ao buscar clientes",
+        description: error.response?.message,
+        variant: "destructive",
+      });
+    }
+  }
+
+  useEffect(() => {
+    fetchProfessionalsData();
+    fetchClientsData();
+    fetchTreatmentsData();
+  }, []);
+
   useEffect(() => {
     if (appointment) {
+      const appointmentDate = new Date(appointment.dateTime);
       reset({
-        ...appointment,
-        date: new Date(appointment.date),
+        id: appointment.id,
+        clientName: appointment.clientName || "",
+        professionalName: appointment.professionalName || "",
+        treatmentName: appointment.treatmentName || "",
+        dateTime: appointment.dateTime || new Date().toISOString(),
+        time: format(appointmentDate, 'HH:mm'),
+        status: appointment.status,
       });
     } else {
       reset({
-        clientId: "",
-        professionalId: "",
-        treatmentId: "",
-        date: new Date(),
+        id: crypto.randomUUID(),
+        clientName: "",
+        professionalName: "",
+        treatmentName: "",
+        dateTime: new Date().toISOString(),
         time: "09:00",
-        status: "scheduled",
-        notes: "",
+        status: AppointmentStatus.SCHEDULED,
       });
     }
   }, [appointment, reset, open]);
 
+  async function appointmentRegister({dateTime, time, status}:AppointmentFormValues){
+    try {
+      const date = new Date(dateTime);
+      const [hours, minutes] = time.split(':');
+      date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      const values = {
+        clientId: clientSelected?.clientId,
+        professionalId: professionalSelected?.professionalId,
+        treatmentId: treatmentSelected?.id,
+        dateTime: date.toISOString(),
+        status
+      }
+      const response = await api.post('/consultations', values)
+      console.log("Consulta registrada com sucesso:", response.data);
+      toast({
+        title: "Consulta registrada com sucesso",
+        description: "A consulta foi registrada com sucesso.",
+        variant: "default",
+      });
+      onSave(response.data);
+    } catch (error:any) {
+      console.error("Erro ao registrar consulta:", error);
+      toast({
+        title: "Erro ao registrar consulta",
+        description: error.response?.message || "Ocorreu um erro ao registrar a consulta.",
+        variant: "destructive",
+      });
+    }
+  }
   const onSubmit = (data: AppointmentFormValues) => {
-    const client = mockClients.find(c => c.id === data.clientId);
-    const professional = mockProfessionals.find(p => p.id === data.professionalId);
-    const treatment = mockTreatments.find(t => t.id === data.treatmentId);
-
-    const appointmentData: Appointment = {
-      ...appointment,
-      id: appointment?.id || `appt-${Date.now()}`,
-      ...data,
-      date: format(data.date, "yyyy-MM-dd"), // Store date as string
-      clientName: client?.name,
-      professionalName: professional?.name,
-      treatmentName: treatment?.name,
-    };
-    onSave(appointmentData);
-    toast({
-        title: appointment ? "Consulta Atualizada!" : "Consulta Agendada!",
-        description: `A consulta para ${client?.name} foi salva com sucesso.`,
-    });
-    onOpenChange(false);
+    appointmentRegister(data);
   };
 
   const availableTimes = Array.from({ length: (18 - 9) * 2 + 1 }, (_, i) => {
@@ -111,49 +190,58 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
-          <Controller name="clientId" control={control} render={({ field }) => (
+          <Controller name="clientName" control={control} render={({ field }) => (
             <div>
-              <Label htmlFor="clientId">Cliente</Label>
+              <Label htmlFor="clientName">Cliente</Label>
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
                 <SelectContent>
-                  {mockClients.map(client => <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>)}
+                  {clients.map(client => (
+                    setClientSelected(client),
+                    <SelectItem key={client.id} value={client.name}>{client.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.clientId && <p className="text-sm text-destructive mt-1">{errors.clientId.message}</p>}
+              {errors.clientName && <p className="text-sm text-destructive mt-1">{errors.clientName.message}</p>}
             </div>
           )} />
 
-          <Controller name="professionalId" control={control} render={({ field }) => (
+          <Controller name="professionalName" control={control} render={({ field }) => (
              <div>
-              <Label htmlFor="professionalId">Profissional</Label>
+              <Label htmlFor="professionalName">Profissional</Label>
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um profissional" /></SelectTrigger>
                 <SelectContent>
-                  {mockProfessionals.map(prof => <SelectItem key={prof.id} value={prof.id}>{prof.name} - {prof.specialty}</SelectItem>)}
+                  {professionals.map((prof: fetchProfessionalAndClient) => (
+                    setProfessionalSelected(prof),
+                    <SelectItem key={prof.id} value={prof.name}>{prof.name} - {prof.role}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.professionalId && <p className="text-sm text-destructive mt-1">{errors.professionalId.message}</p>}
+              {errors.professionalName && <p className="text-sm text-destructive mt-1">{errors.professionalName.message}</p>}
             </div>
           )} />
 
-          <Controller name="treatmentId" control={control} render={({ field }) => (
+          <Controller name="treatmentName" control={control} render={({ field }) => (
             <div>
-              <Label htmlFor="treatmentId">Tratamento</Label>
+              <Label htmlFor="treatmentName">Tratamento</Label>
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um tratamento" /></SelectTrigger>
                 <SelectContent>
-                  {mockTreatments.map(treat => <SelectItem key={treat.id} value={treat.id}>{treat.name}</SelectItem>)}
+                  {treatments.map(treat => (
+                    setTreatmentSelected(treat),
+                    <SelectItem key={treat.id} value={treat.name}>{treat.name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
-              {errors.treatmentId && <p className="text-sm text-destructive mt-1">{errors.treatmentId.message}</p>}
+              {errors.treatmentName && <p className="text-sm text-destructive mt-1">{errors.treatmentName.message}</p>}
             </div>
           )} />
           
           <div className="grid grid-cols-2 gap-4">
-            <Controller name="date" control={control} render={({ field }) => (
+            <Controller name="dateTime" control={control} render={({ field }) => (
               <div>
-                <Label htmlFor="date">Data</Label>
+                <Label htmlFor="dateTime">Data</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -165,10 +253,16 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus locale={ptBR} />
+                    <Calendar 
+                      mode="single" 
+                      selected={field.value ? new Date(field.value) : undefined} 
+                      onSelect={(date) => field.onChange(date?.toISOString())} 
+                      initialFocus 
+                      locale={ptBR} 
+                    />
                   </PopoverContent>
                 </Popover>
-                {errors.date && <p className="text-sm text-destructive mt-1">{errors.date.message}</p>}
+                {errors.dateTime && <p className="text-sm text-destructive mt-1">{errors.dateTime.message}</p>}
               </div>
             )} />
 
@@ -192,20 +286,14 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione o status" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="scheduled">Agendada</SelectItem>
-                  <SelectItem value="completed">Concluída</SelectItem>
-                  <SelectItem value="cancelled">Cancelada</SelectItem>
+                  <SelectItem value={AppointmentStatus.SCHEDULED}>Agendada</SelectItem>
+                  <SelectItem value={AppointmentStatus.COMPLETED}>Concluída</SelectItem>
+                  <SelectItem value={AppointmentStatus.CANCELED}>Cancelada</SelectItem>
                 </SelectContent>
               </Select>
               {errors.status && <p className="text-sm text-destructive mt-1">{errors.status.message}</p>}
             </div>
           )} />
-
-          <div>
-            <Label htmlFor="notes">Observações</Label>
-            <Textarea id="notes" {...register("notes")} placeholder="Alguma observação adicional?"/>
-            {errors.notes && <p className="text-sm text-destructive mt-1">{errors.notes.message}</p>}
-          </div>
 
           <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>

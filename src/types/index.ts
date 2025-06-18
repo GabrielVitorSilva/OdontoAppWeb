@@ -98,3 +98,19 @@ export interface Professional {
     endTime: string; // HH:MM
   }>;
 }
+
+
+export interface fetchProfessionalAndClient {
+  id: string;
+  name: string;
+  email: string;
+  cpf: string;
+  professionalId: string;
+  clientId: string;
+  role: Profile;
+}
+
+export interface fetchProfessionalAndClientResponse {
+  total: number;
+  data: fetchProfessionalAndClient[];
+}

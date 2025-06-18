@@ -2,7 +2,6 @@
 
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { mockAppointments } from "@/lib/mock-data";
 import type { Appointment } from "@/types";
 import { PlusCircle } from "lucide-react";
 import React, { useState, useEffect } from "react";
@@ -11,8 +10,7 @@ import { AppointmentDialog } from "@/components/appointments/appointment-dialog"
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format, parseISO, isFuture, isPast, isToday } from "date-fns";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import api from "@/services/api";
 import { useAuth } from "@/contexts/auth-context";
 
@@ -67,6 +65,23 @@ export default function AppointmentsPage() {
   };
 
   const handleSave = (data: Appointment) => {
+    if (selectedAppointment) {
+      setAppointments((prev) =>
+        prev.map((appt) => (appt.id === selectedAppointment.id ? data : appt))
+      );
+      toast({
+        title: "Consulta atualizada",
+        description: "A consulta foi atualizada com sucesso.",
+      });
+    } else {
+      setAppointments((prev) => [...prev, data]);
+      toast({
+        title: "Consulta agendada",
+        description: "A nova consulta foi agendada com sucesso.",
+      });
+    }
+    setIsDialogOpen(false);
+    setSelectedAppointment(null);
   };
 
   const getFilteredAppointments = () => {

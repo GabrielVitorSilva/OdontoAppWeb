@@ -1,9 +1,8 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Profile, type fetchAllUsersByIdResponse, type User } from "@/types";
+import { Profile, type fetchAllUsersByIdResponse } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Edit, Mail, ShieldCheck, Trash2, UserCircle, Briefcase, User as UserIcon } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 
 interface UserCardProps {
   user: fetchAllUsersByIdResponse;

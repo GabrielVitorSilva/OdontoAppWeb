@@ -26,6 +26,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 import api from "@/services/api";
+import { useAuth } from "@/contexts/auth-context";
 
 
 export const appointmentSchema = z.object({
@@ -53,14 +54,16 @@ interface AppointmentDialogProps {
 }
 
 export function AppointmentDialog({ appointment, open, onOpenChange, onSave, children }: AppointmentDialogProps) {
+  const {user} = useAuth();
+
   const { toast } = useToast();
   const [professionals, setProfessionals] = useState<fetchProfessionalAndClient[]>([]);
   const [clients, setClients] = useState<fetchProfessionalAndClient[]>([]);
-  const [treatments, setTreatments] = useState<Treatment[]>([]);
+  const [consultations, setConsultations] = useState<Appointment[]>([]);
   
   const [clientSelected, setClientSelected] = useState<fetchProfessionalAndClient>();
   const [professionalSelected, setProfessionalSelected] = useState<fetchProfessionalAndClient>();
-  const [treatmentSelected, setTreatmentSelected] = useState<Treatment>();
+  const [consultationsSelected, setConsultationsSelected] = useState<Appointment>();
 
   const { control, register, handleSubmit, reset, formState: { errors } } = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
@@ -96,12 +99,12 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
 
   async function fetchTreatmentsData() {
     try {
-      const response = await api.get('/treatments');
-      setTreatments(response.data.treatments);
+      const response = await api.get(`/users/${user?.user.User.id}/consultations`);
+      setConsultations(response.data.consultations);
     } catch (error:any) {
-      console.error("Erro ao buscar clientes:", error);
+      console.error("Erro ao buscar consultas:", error);
       toast({
-        title: "Erro ao buscar clientes",
+        title: "Erro ao buscar consultas",
         description: error.response?.message,
         variant: "destructive",
       });
@@ -148,12 +151,11 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
       const values = {
         clientId: clientSelected?.clientId,
         professionalId: professionalSelected?.professionalId,
-        treatmentId: treatmentSelected?.id,
+        treatmentId: consultationsSelected?.id,
         dateTime: date.toISOString(),
         status
       }
       const response = await api.post('/consultations', values)
-      console.log("Consulta registrada com sucesso:", response.data);
       toast({
         title: "Consulta registrada com sucesso",
         description: "A consulta foi registrada com sucesso.",
@@ -169,8 +171,41 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
       });
     }
   }
+
+  async function appointmentUpdate({dateTime, time, status}:AppointmentFormValues){
+    try {
+      const date = new Date(dateTime);
+      const [hours, minutes] = time.split(':');
+      date.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      const values = {
+        clientId: clientSelected?.clientId,
+        professionalId: professionalSelected?.professionalId,
+        dateTime: date.toISOString(),
+        status
+      }
+      const response = await api.patch(`/consultations/${consultationsSelected?.id}`, values)
+      toast({
+        title: "Consulta registrada com sucesso",
+        description: "A consulta foi registrada com sucesso.",
+        variant: "default",
+      });
+      onSave(response.data);
+    } catch (error:any) {
+      console.error("Erro ao atualizar consulta:", error);
+      toast({
+        title: "Erro ao atualizar consulta",
+        description: error.response?.message || "Ocorreu um erro ao atualizar a consulta.",
+        variant: "destructive",
+      });
+    }
+  }
   const onSubmit = (data: AppointmentFormValues) => {
-    appointmentRegister(data);
+  if (appointment) {
+      appointmentUpdate(data);
+    } else {
+      appointmentRegister(data);
+    }
   };
 
   const availableTimes = Array.from({ length: (18 - 9) * 2 + 1 }, (_, i) => {
@@ -228,9 +263,9 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um tratamento" /></SelectTrigger>
                 <SelectContent>
-                  {treatments.map(treat => (
-                    setTreatmentSelected(treat),
-                    <SelectItem key={treat.id} value={treat.name}>{treat.name}</SelectItem>
+                  {consultations.map(consult => (
+                    setConsultationsSelected(consult),
+                    <SelectItem key={consult.id} value={consult.treatmentName}>{consult.treatmentName}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

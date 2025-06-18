@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect } from 'react';
+import AppoitmentImage from '../assets/appointment.png'
+import SmartAppoitment from '../assets/smart-schedule.png'
 
 export default function LandingPage() {
   const { isAuthenticated, loading } = useAuth();
@@ -75,10 +76,10 @@ export default function LandingPage() {
         </section>
 
         <section className="container py-12">
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-2 max-w-5xl mx-auto">
                  <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                     <CardHeader>
-                        <Image src="https://placehold.co/600x400.png" alt="Gerenciamento de Tratamentos" width={600} height={400} className="rounded-t-lg" data-ai-hint="dental treatment plan" />
+                        <Image src={AppoitmentImage} alt="Gerenciamento de Tratamentos" width={600} height={400} className="rounded-t-lg" data-ai-hint="dental treatment plan" />
                         <CardTitle className="mt-4">Gerenciamento de Tratamentos</CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -87,20 +88,11 @@ export default function LandingPage() {
                 </Card>
                  <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
                     <CardHeader>
-                        <Image src="https://placehold.co/600x400.png" alt="Agendamento de Consultas" width={600} height={400} className="rounded-t-lg" data-ai-hint="calendar schedule appointment" />
+                        <Image src={SmartAppoitment} alt="Agendamento de Consultas" width={600} height={400} className="rounded-t-lg" data-ai-hint="calendar schedule appointment" />
                         <CardTitle className="mt-4">Agendamento Inteligente</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <CardDescription>Facilite o agendamento de consultas para seus pacientes e otimize a agenda dos profissionais.</CardDescription>
-                    </CardContent>
-                </Card>
-                 <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-                    <CardHeader>
-                        <Image src="https://placehold.co/600x400.png" alt="Resumo do Cliente com IA" width={600} height={400} className="rounded-t-lg" data-ai-hint="ai medical records" />
-                        <CardTitle className="mt-4">Histórico Inteligente com IA</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <CardDescription>Obtenha resumos concisos do histórico de seus pacientes utilizando inteligência artificial.</CardDescription>
                     </CardContent>
                 </Card>
             </div>

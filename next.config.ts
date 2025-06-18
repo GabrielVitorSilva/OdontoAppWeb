@@ -23,7 +23,8 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_BASEURL}:path*`, 
+        destination: 'https://odonto.lat/:path*',
+        // destination: `${process.env.NEXT_PUBLIC_BASEURL}:path*`, //local
       },
     ];
   },

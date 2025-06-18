@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Profile, type fetchAllUsersByIdResponse, type User } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Edit, Mail, ShieldCheck, Trash2, UserCircle, Briefcase } from "lucide-react";
+import { Edit, Mail, ShieldCheck, Trash2, UserCircle, Briefcase, User as UserIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface UserCardProps {
@@ -13,7 +13,7 @@ interface UserCardProps {
 }
 
 export function UserCard({ user, onEdit, onDelete, currentUserId }: UserCardProps) {
-  const RoleIcon = user.User.role === Profile.ADMIN ? ShieldCheck : Briefcase;
+  const RoleIcon = user.User.role === Profile.ADMIN ? ShieldCheck : user.User.role === Profile.PROFESSIONAL ? Briefcase : UserIcon;
 
   return (
     <Card className="flex flex-col h-full shadow-lg hover:shadow-xl transition-shadow duration-300">

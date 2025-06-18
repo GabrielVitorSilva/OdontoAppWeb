@@ -57,6 +57,7 @@ export default function AppointmentsPage() {
   };
 
   const handleEdit = (appointment: Appointment) => {
+    console.log("Editing appointment:", appointment);
     setSelectedAppointment(appointment);
     setIsDialogOpen(true);
   };

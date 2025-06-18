@@ -229,11 +229,16 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
           <Controller name="clientName" control={control} render={({ field }) => (
             <div>
               <Label htmlFor="clientName">Cliente</Label>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={(value) => {
+                field.onChange(value);
+                const selectedClient = clients.find(client => client.name === value);
+                if (selectedClient) {
+                  setClientSelected(selectedClient);
+                }
+              }} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um cliente" /></SelectTrigger>
                 <SelectContent>
                   {clients.map(client => (
-                    setClientSelected(client),
                     <SelectItem key={client.id} value={client.name}>{client.name}</SelectItem>
                   ))}
                 </SelectContent>
@@ -245,11 +250,16 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
           <Controller name="professionalName" control={control} render={({ field }) => (
              <div>
               <Label htmlFor="professionalName">Profissional</Label>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={(value) => {
+                field.onChange(value);
+                const selectedProf = professionals.find(prof => prof.name === value);
+                if (selectedProf) {
+                  setProfessionalSelected(selectedProf);
+                }
+              }} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um profissional" /></SelectTrigger>
                 <SelectContent>
                   {professionals.map((prof: fetchProfessionalAndClient) => (
-                    setProfessionalSelected(prof),
                     <SelectItem key={prof.id} value={prof.name}>{prof.name} - {prof.role}</SelectItem>
                   ))}
                 </SelectContent>
@@ -261,11 +271,16 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
           <Controller name="treatmentName" control={control} render={({ field }) => (
             <div>
               <Label htmlFor="treatmentName">Tratamento</Label>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select onValueChange={(value) => {
+                field.onChange(value);
+                const selectedTreatment = treatment.find(t => t.name === value);
+                if (selectedTreatment) {
+                  setTreatmentSelected(selectedTreatment);
+                }
+              }} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um tratamento" /></SelectTrigger>
                 <SelectContent>
                   {treatment.map(treatment => (
-                    setTreatmentSelected(treatment),
                     <SelectItem key={treatment.id} value={treatment.name}>{treatment.name}</SelectItem>
                   ))}
                 </SelectContent>

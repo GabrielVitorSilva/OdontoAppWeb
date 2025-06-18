@@ -55,7 +55,7 @@ interface AppointmentDialogProps {
 
 export function AppointmentDialog({ appointment, open, onOpenChange, onSave, children }: AppointmentDialogProps) {
   const {user} = useAuth();
-
+  console.log(appointment, "Appointment Dialog");
   const { toast } = useToast();
   const [professionals, setProfessionals] = useState<fetchProfessionalAndClient[]>([]);
   const [clients, setClients] = useState<fetchProfessionalAndClient[]>([]);
@@ -165,6 +165,14 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
       onSave(response.data);
     } catch (error:any) {
       console.error("Erro ao registrar consulta:", error);
+      if(error.response?.data?.message) {
+        toast({
+          title: "Erro ao registrar consulta",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Erro ao registrar consulta",
         description: error.response?.message || "Ocorreu um erro ao registrar a consulta.",
@@ -185,7 +193,7 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
         dateTime: date.toISOString(),
         status
       }
-      const response = await api.patch(`/consultations/${treatmentSelected?.id}`, values)
+      const response = await api.patch(`/consultations/${appointment?.id}`, values)
       toast({
         title: "Consulta registrada com sucesso",
         description: "A consulta foi registrada com sucesso.",
@@ -194,6 +202,14 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
       onSave(response.data);
     } catch (error:any) {
       console.error("Erro ao atualizar consulta:", error);
+      if(error.response?.data?.message) {
+        toast({
+          title: "Erro ao atualizar consulta",
+          description: error.response.data.message,
+          variant: "destructive",
+        });
+        return;
+      }
       toast({
         title: "Erro ao atualizar consulta",
         description: error.response?.message || "Ocorreu um erro ao atualizar a consulta.",
@@ -202,6 +218,7 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
     }
   }
   const onSubmit = (data: AppointmentFormValues) => {
+    console.log("Submitting appointment data:", appointment);
   if (appointment) {
       appointmentUpdate(data);
     } else {

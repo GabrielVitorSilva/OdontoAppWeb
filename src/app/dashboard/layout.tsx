@@ -24,7 +24,7 @@ export default function DashboardLayout({
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Logo iconSize={48} textSize="text-4xl" />
+          <Logo iconSize={48} textSize="text-4xl" href="/dashboard" />
           <p className="text-muted-foreground">Carregando...</p>
         </div>
       </div>

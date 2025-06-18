@@ -28,7 +28,7 @@ function AppShellHeader() {
             <span className="sr-only">Toggle Menu</span>
           </Button>
         ) : null}
-         {!isMobile && state === 'expanded' && <Logo className="mr-4 hidden md:flex" showText={true} />}
+         {!isMobile && state === 'expanded' && <Logo className="mr-4 hidden md:flex" showText={true} href="/dashboard" />}
         <div className="flex flex-1 items-center justify-end space-x-2">
           <UserNav />
         </div>
@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     }}>
       <Sidebar collapsible="icon" variant="sidebar" side="left">
         <SidebarHeader className="p-4">
-           <Logo showText={true} />
+           <Logo showText={true} href="/dashboard" />
         </SidebarHeader>
         <SidebarContent>
           <SidebarNav />

@@ -6,6 +6,7 @@ interface LogoProps {
   iconSize?: number;
   textSize?: string;
   showText?: boolean;
+  href?: string;
 }
 
 export function Logo({
@@ -13,9 +14,10 @@ export function Logo({
   iconSize = 24,
   textSize = 'text-xl',
   showText = true,
+  href = "/",
 }: LogoProps) {
   return (
-    <Link href="/dashboard" className={`flex items-center gap-2 ${className}`}>
+    <Link href={href} className={`flex items-center gap-2 ${className}`}>
       <Image
         src="/logo.png"
         alt="Logo OdontoApp"
@@ -24,7 +26,7 @@ export function Logo({
         className="text-primary"
       />
       {showText && (
-        <span className={`font-headline font-bold ${textSize} text-primary`}>
+        <span className={`font-headline font-bold ${textSize} text-primary hidden sm:block`}>
           OdontoApp
         </span>
       )}

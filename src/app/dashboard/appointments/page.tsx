@@ -78,24 +78,18 @@ export default function AppointmentsPage() {
     }
   };
 
-  const handleSave = (data: Appointment) => {
-    if (selectedAppointment) {
-      setAppointments((prev) =>
-        prev.map((appt) => (appt.id === selectedAppointment.id ? data : appt))
-      );
+  const handleSave = async (data: Appointment) => {
+    try {
+      await fetchAppointments(); 
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Erro ao atualizar lista de tratamentos:", error);
       toast({
-        title: "Consulta atualizada",
-        description: "A consulta foi atualizada com sucesso.",
-      });
-    } else {
-      setAppointments((prev) => [...prev, data]);
-      toast({
-        title: "Consulta agendada",
-        description: "A nova consulta foi agendada com sucesso.",
+        title: "Erro ao atualizar lista",
+        description: "Não foi possível atualizar a lista de tratamentos.",
+        variant: "destructive",
       });
     }
-    setIsDialogOpen(false);
-    setSelectedAppointment(null);
   };
 
   const getFilteredAppointments = () => {

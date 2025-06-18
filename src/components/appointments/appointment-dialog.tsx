@@ -59,11 +59,11 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
   const { toast } = useToast();
   const [professionals, setProfessionals] = useState<fetchProfessionalAndClient[]>([]);
   const [clients, setClients] = useState<fetchProfessionalAndClient[]>([]);
-  const [consultations, setConsultations] = useState<Appointment[]>([]);
+  const [treatment, setTreatments] = useState<Treatment[]>([]);
   
   const [clientSelected, setClientSelected] = useState<fetchProfessionalAndClient>();
   const [professionalSelected, setProfessionalSelected] = useState<fetchProfessionalAndClient>();
-  const [consultationsSelected, setConsultationsSelected] = useState<Appointment>();
+  const [treatmentSelected, setTreatmentSelected] = useState<Treatment>();
 
   const { control, register, handleSubmit, reset, formState: { errors } } = useForm<AppointmentFormValues>({
     resolver: zodResolver(appointmentSchema),
@@ -99,8 +99,9 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
 
   async function fetchTreatmentsData() {
     try {
-      const response = await api.get(`/users/${user?.user.User.id}/consultations`);
-      setConsultations(response.data.consultations);
+      const response = await api.get(`/treatments`);
+      console.log("Tratamentos:", response.data.treatments);
+      setTreatments(response.data.treatments);
     } catch (error:any) {
       console.error("Erro ao buscar consultas:", error);
       toast({
@@ -151,7 +152,7 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
       const values = {
         clientId: clientSelected?.clientId,
         professionalId: professionalSelected?.professionalId,
-        treatmentId: consultationsSelected?.id,
+        treatmentId: treatmentSelected?.id,
         dateTime: date.toISOString(),
         status
       }
@@ -184,7 +185,7 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
         dateTime: date.toISOString(),
         status
       }
-      const response = await api.patch(`/consultations/${consultationsSelected?.id}`, values)
+      const response = await api.patch(`/consultations/${treatmentSelected?.id}`, values)
       toast({
         title: "Consulta registrada com sucesso",
         description: "A consulta foi registrada com sucesso.",
@@ -263,9 +264,9 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
               <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger><SelectValue placeholder="Selecione um tratamento" /></SelectTrigger>
                 <SelectContent>
-                  {consultations.map(consult => (
-                    setConsultationsSelected(consult),
-                    <SelectItem key={consult.id} value={consult.treatmentName}>{consult.treatmentName}</SelectItem>
+                  {treatment.map(treatment => (
+                    setTreatmentSelected(treatment),
+                    <SelectItem key={treatment.id} value={treatment.name}>{treatment.name}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

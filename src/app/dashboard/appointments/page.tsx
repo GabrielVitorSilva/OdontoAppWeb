@@ -60,8 +60,22 @@ export default function AppointmentsPage() {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = (appointmentId: string) => {
-    
+  const handleDelete = async (appointmentId: string) => {
+    const response = await api.delete(`/consultations/${appointmentId}`);
+    console.log("Delete response:", response);
+    if (response.status === 204) {
+      setAppointments((prev) => prev.filter((appt) => appt.id !== appointmentId));
+      toast({
+        title: "Consulta removida",
+        description: "A consulta foi removida com sucesso.",
+      });
+    } else {
+      toast({
+        title: "Erro ao remover consulta",
+        description: "Ocorreu um erro ao remover a consulta.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSave = (data: Appointment) => {
@@ -134,7 +148,7 @@ export default function AppointmentsPage() {
                 key={appointment.id} 
                 appointment={appointment} 
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                onDelete={() => {handleDelete(appointment.id)}}
               />
             ))}
           </div>

@@ -242,7 +242,7 @@ export function AppointmentDialog({ appointment, open, onOpenChange, onSave, chi
             {appointment ? "Atualize os detalhes da consulta." : "Preencha os detalhes para agendar uma nova consulta."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-2">
           <Controller name="clientName" control={control} render={({ field }) => (
             <div>
               <Label htmlFor="clientName">Cliente</Label>

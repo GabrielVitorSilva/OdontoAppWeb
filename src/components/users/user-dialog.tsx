@@ -166,7 +166,7 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
             {isEditing ? "Atualize os dados do usuário." : "Preencha os dados do novo usuário."}
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto pr-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4 max-h-[70vh] overflow-y-auto px-2">
           <div>
             <Label htmlFor="name">Nome Completo</Label>
             <Input id="name" {...register("name")} />

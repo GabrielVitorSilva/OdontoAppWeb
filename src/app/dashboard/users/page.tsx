@@ -99,14 +99,16 @@ export default function UsersPage() {
   const handleDelete = async (userId: string) => {
     try {
       const response = await api.delete(`/users/${userId}`);
-      if (response.status === 200) {
+      if (response.status === 204) {
         setUsers(users.filter(user => user.profileData.id !== userId));
         toast({
           title: "Usuário excluído com sucesso",
           description: "O usuário foi removido da lista.",
           variant: "default",
         });
+        await fetchUsers();
       }
+      
     } catch (error:any) {
       console.error("Erro ao excluir usuário:", error.response?.data);
       toast({

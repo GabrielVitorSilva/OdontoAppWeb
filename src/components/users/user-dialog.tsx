@@ -14,12 +14,13 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fetchAllUsersByIdResponse, Profile, User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import api from "@/services/api";
 import { formatCPF } from "../auth/signup-form";
+import { Eye, EyeOff } from 'lucide-react';
 
 const userSchemaBase = z.object({
   name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres."),
@@ -31,7 +32,12 @@ const userSchemaBase = z.object({
 });
 
 const newUserSchema = userSchemaBase.extend({
-  password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres."),
+  password: z.string()
+  .min(6, { message: "A senha deve ter pelo menos 6 caracteres." })
+  .regex(/[A-Z]/, { message: "A senha deve conter pelo menos uma letra maiúscula." })
+  .regex(/[a-z]/, { message: "A senha deve conter pelo menos uma letra minúscula." })
+  .regex(/[0-9]/, { message: "A senha deve conter pelo menos um número." })
+  .regex(/[^A-Za-z0-9]/, { message: "A senha deve conter pelo menos um caractere especial." }),
   confirmPassword: z.string().min(6, "Confirme a senha."),
 }).refine(data => data.password === data.confirmPassword, {
   message: "As senhas não coincidem.",
@@ -59,6 +65,8 @@ interface UserDialogProps {
 export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps) {
   const { toast } = useToast();
   const isEditing = !!user;
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { control, register, handleSubmit, reset, watch, formState: { errors }, setValue } = useForm<FormValues>({
     resolver: zodResolver(isEditing ? editUserSchema : newUserSchema),
     defaultValues: isEditing ? {
@@ -179,12 +187,50 @@ export function UserDialog({ user, open, onOpenChange, onSave }: UserDialogProps
             <>
               <div>
                 <Label htmlFor="password">Senha</Label>
-                <Input id="password" type="password" {...register("password")} />
+                <div className="relative">
+                  <Input 
+                    id="password" 
+                    type={showPassword ? "text" : "password"} 
+                    {...register("password")} 
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
                 {!isEditing && errors.password && <p className="text-sm text-destructive mt-1">{(errors as any).password?.message}</p>}
               </div>
               <div>
                 <Label htmlFor="confirmPassword">Confirmar Senha</Label>
-                <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
+                <div className="relative">
+                  <Input 
+                    id="confirmPassword" 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    {...register("confirmPassword")} 
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
                 {!isEditing && errors.confirmPassword && <p className="text-sm text-destructive mt-1">{(errors as any).confirmPassword?.message}</p>}
               </div>
             </>

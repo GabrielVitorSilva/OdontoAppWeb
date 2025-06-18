@@ -131,13 +131,13 @@ export default function AppointmentsPage() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-md w-full sm:w-auto"
         />
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
+        {/* <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
           <TabsList>
             <TabsTrigger value="upcoming">Próximas</TabsTrigger>
             <TabsTrigger value="past">Histórico</TabsTrigger>
             <TabsTrigger value="all">Todas</TabsTrigger>
           </TabsList>
-        </Tabs>
+        </Tabs> */}
       </div>
       
       {displayedAppointments.length > 0 ? (

@@ -109,35 +109,40 @@ export default function TreatmentsPage() {
   );
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-10 px-4 md:px-10">
       <PageHeader title="Gerenciamento de Tratamentos" description="Visualize os tratamentos oferecidos. Administradores podem criar e editar.">
-        {isAdmin && ( 
-          <Button onClick={handleAddNew}>
-            <PlusCircle className="w-4 h-4 mr-2" />
+        {isAdmin && (
+          <Button
+            onClick={handleAddNew}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md px-5 py-2 flex items-center gap-2 transition-colors"
+          >
+            <PlusCircle className="w-5 h-5" />
             Novo Tratamento
           </Button>
         )}
       </PageHeader>
 
-      <div className="mb-6">
+      <div className="mb-8 flex justify-between items-center">
         <Input
           placeholder="Buscar tratamentos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          className="max-w-sm rounded-lg shadow-sm border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
         />
       </div>
       
       {filteredTreatments.length > 0 ? (
-        <ScrollArea className="h-[calc(100vh-280px)]"> 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
+        <ScrollArea className="h-[calc(100vh-280px)]">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {filteredTreatments.map((treatment) => (
-              <TreatmentCard 
-                key={treatment.id} 
-                treatment={treatment} 
-                onEdit={isAdmin ? handleEdit : undefined}
-                onDelete={isAdmin ? handleDelete : undefined}
-              />
+              <div className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white/90 border-0 group">
+                <TreatmentCard 
+                  key={treatment.id} 
+                  treatment={treatment} 
+                  onEdit={isAdmin ? handleEdit : undefined}
+                  onDelete={isAdmin ? handleDelete : undefined}
+                />
+              </div>
             ))}
           </div>
         </ScrollArea>
@@ -148,7 +153,7 @@ export default function TreatmentsPage() {
         </div>
       )}
 
-      {isAdmin && ( 
+      {isAdmin && (
         <TreatmentDialog
           treatment={selectedTreatment}
           open={isDialogOpen}
@@ -156,6 +161,6 @@ export default function TreatmentsPage() {
           onSave={handleSave}
         />
       )}
-    </>
+    </div>
   );
 }

@@ -110,40 +110,38 @@ export default function AppointmentsPage() {
   const displayedAppointments = getFilteredAppointments();
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 py-10 px-4 md:px-10">
       <PageHeader title="Gerenciamento de Consultas" description="Agende, edite e visualize as consultas dos pacientes.">
-        <Button onClick={handleAddNew}>
-          <PlusCircle className="w-4 h-4 mr-2" />
+        <Button
+          onClick={handleAddNew}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md px-5 py-2 flex items-center gap-2 transition-colors"
+        >
+          <PlusCircle className="w-5 h-5" />
           Nova Consulta
         </Button>
       </PageHeader>
 
-      <div className="mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+      <div className="mb-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
         <Input
           placeholder="Buscar consultas (cliente, profissional, tratamento)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md w-full sm:w-auto"
+          className="max-w-md w-full sm:w-auto rounded-lg shadow-sm border-blue-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition"
         />
-        {/* <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full sm:w-auto">
-          <TabsList>
-            <TabsTrigger value="upcoming">Próximas</TabsTrigger>
-            <TabsTrigger value="past">Histórico</TabsTrigger>
-            <TabsTrigger value="all">Todas</TabsTrigger>
-          </TabsList>
-        </Tabs> */}
       </div>
       
       {displayedAppointments.length > 0 ? (
-        <ScrollArea className="h-[calc(100vh-320px)]"> {/* Adjust height as needed */}
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
+        <ScrollArea className="h-[calc(100vh-320px)]">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pr-4">
             {displayedAppointments.map((appointment) => (
-              <AppointmentCard 
-                key={appointment.id} 
-                appointment={appointment} 
-                onEdit={handleEdit}
-                onDelete={() => {handleDelete(appointment.id)}}
-              />
+              <div className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 bg-white/90 border-0 group">
+                <AppointmentCard 
+                  key={appointment.id} 
+                  appointment={appointment} 
+                  onEdit={handleEdit}
+                  onDelete={() => {handleDelete(appointment.id)}}
+                />
+              </div>
             ))}
           </div>
         </ScrollArea>
@@ -160,6 +158,6 @@ export default function AppointmentsPage() {
         onOpenChange={setIsDialogOpen}
         onSave={handleSave}
       />
-    </>
+    </div>
   );
 }

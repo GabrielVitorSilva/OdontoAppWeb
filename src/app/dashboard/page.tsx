@@ -63,22 +63,33 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold font-headline">Dashboard</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex flex-col gap-10 py-10 px-4 md:px-10">
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-4xl font-extrabold font-headline text-blue-900 drop-shadow-sm tracking-tight">Dashboard</h1>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {summaryCards.map((card) => (
-          <Card key={card.title} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+        {summaryCards.map((card, idx) => (
+          <Card
+            key={card.title}
+            className="rounded-2xl shadow-lg hover:shadow-2xl transition-shadow duration-300 border-0 bg-white/90 hover:bg-blue-50 group"
+          >
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium font-headline">{card.title}</CardTitle>
-              <card.icon className="h-5 w-5 text-muted-foreground" />
+              <CardTitle className="text-base font-semibold font-headline text-blue-900 group-hover:text-blue-700 transition-colors">
+                {card.title}
+              </CardTitle>
+              <card.icon
+                className={
+                  `h-8 w-8 ` +
+                  (idx === 0 ? 'text-blue-500' : idx === 1 ? 'text-emerald-500' : idx === 2 ? 'text-yellow-500' : 'text-green-600') +
+                  ' drop-shadow-sm transition-colors'
+                }
+              />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{card.value}</div>
-              <p className="text-xs text-muted-foreground pt-1">{card.description}</p>
-              <Button variant="link" asChild className="p-0 mt-2 text-sm">
+              <div className="text-4xl font-extrabold mb-1 group-hover:scale-105 transition-transform" style={{letterSpacing: '-1px'}}>{card.value}</div>
+              <p className="text-xs text-muted-foreground pt-1 mb-2">{card.description}</p>
+              <Button variant="link" asChild className="p-0 mt-2 text-sm text-blue-700 hover:text-blue-900">
                 <Link href={card.link}>Ver mais</Link>
               </Button>
             </CardContent>
@@ -86,22 +97,22 @@ export default function DashboardPage() {
         ))}
       </div>
       
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card className="shadow-md">
+      <div className="grid gap-8 md:grid-cols-2">
+        <Card className="rounded-2xl shadow-md border-0 bg-white/90">
           <CardHeader>
-            <CardTitle className="font-headline">Receita Total</CardTitle>
-            <CardDescription>Valor total arrecadado pela clínica.</CardDescription>
+            <CardTitle className="font-headline text-green-700 text-lg">Receita Total</CardTitle>
+            <CardDescription className="text-gray-500">Valor total arrecadado pela clínica.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">
+            <div className="text-4xl font-extrabold text-green-600 drop-shadow-sm">
               R$ {(statistics?.totalRevenue ?? 0).toFixed(2)}
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-md">
+        <Card className="rounded-2xl shadow-md border-0 bg-white/90">
           <CardHeader>
-            <CardTitle className="font-headline">Lembretes</CardTitle>
-            <CardDescription>Notificações e tarefas pendentes importantes.</CardDescription>
+            <CardTitle className="font-headline text-blue-700 text-lg">Lembretes</CardTitle>
+            <CardDescription className="text-gray-500">Notificações e tarefas pendentes importantes.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">Em breve: Lembretes de confirmação, aniversários, etc.</p>

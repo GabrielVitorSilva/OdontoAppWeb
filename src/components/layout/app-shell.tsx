@@ -50,20 +50,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         localStorage.setItem('sidebar_state', JSON.stringify(open));
       }
     }}>
-      <Sidebar collapsible="icon" variant="sidebar" side="left">
-        <SidebarHeader className="p-4">
-           <Logo showText={true} href="/dashboard" />
+      <Sidebar collapsible="icon" variant="sidebar" side="left" className="bg-[#25324B] border-none rounded-none min-h-screen">
+        <SidebarHeader className="p-4 bg-[#25324B]">
+           <Logo showText={true} href="/dashboard" textColor="text-white" />
         </SidebarHeader>
-        <SidebarContent>
+        <SidebarContent className="bg-[#25324B]">
           <SidebarNav />
         </SidebarContent>
-        {/* <SidebarFooter className="p-2">
-          <UserNav /> // UserNav is moved to header for better UX with collapsible sidebar
+        {/* <SidebarFooter className="p-2 bg-[#25324B]">
+          <UserNav />
         </SidebarFooter> */}
       </Sidebar>
       <SidebarInset>
         <AppShellHeader />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 bg-gradient-to-br from-blue-50 via-white to-green-50 min-h-screen">
           {children}
         </main>
       </SidebarInset>
